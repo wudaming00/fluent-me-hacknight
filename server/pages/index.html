@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluent Me — a tutor that remembers you</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
+<style>
+.cols { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; margin-top: 8px; }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+
+.panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; background: var(--surface); }
+.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 12px; }
+
+.ptt-wrap { text-align: center; margin: 18px 0 6px; }
+.ptt { width: 112px; height: 112px; border-radius: 50%; border: 2px solid var(--blue);
+  background: rgba(57,135,229,0.10); color: var(--ink); font-size: 14px; font-weight: 650;
+  cursor: pointer; user-select: none; transition: transform .12s, box-shadow .2s;
+  -webkit-tap-highlight-color: transparent; touch-action: none; }
+.ptt:disabled { opacity: .35; cursor: not-allowed; }
+.ptt.rec { border-color: var(--critical); background: rgba(208,59,59,0.16);
+  transform: scale(1.06); box-shadow: 0 0 36px rgba(208,59,59,0.4); }
+.ptt-hint { color: var(--ink-3); font-size: 12.5px; margin-top: 8px; min-height: 17px; }
+
+.startbtn { display: inline-block; border: 1px solid var(--blue); color: var(--ink); background: rgba(57,135,229,0.14);
+  border-radius: 10px; padding: 10px 22px; font-size: 14.5px; font-weight: 650; cursor: pointer; }
+.startbtn.end { border-color: var(--hairline); background: transparent; color: var(--ink-2); }
+
+.chat { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.bub { max-width: 88%; padding: 11px 14px; border-radius: 12px; font-size: 14px; line-height: 1.55;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--hairline); }
+.bub.you { align-self: flex-end; border-color: rgba(57,135,229,0.4); }
+.bub.tutor { align-self: flex-start; }
+.bub .who { font-size: 10.5px; text-transform: uppercase; letter-spacing: .7px; color: var(--ink-3); margin-bottom: 3px; }
+.bub audio { height: 30px; margin-top: 6px; width: 100%; }
+.err { border-bottom: 1px dashed var(--critical); }
+.fix { margin-top: 8px; border-top: 1px dashed var(--grid); padding-top: 8px; }
+.fix .lab { font-size: 10.5px; color: var(--aqua); text-transform: uppercase; letter-spacing: .6px; margin-right: 6px; }
+.errchips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.errchip { font-size: 11.5px; border: 1px solid rgba(208,59,59,.45); color: var(--ink-2);
+  border-radius: 12px; padding: 3px 10px; }
+.errchip b { color: var(--ink); font-weight: 600; }
+.badge { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+
+.dim { margin-bottom: 10px; }
+.dim .row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+.dim .row b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; background: var(--blue); width: 0%; transition: width .5s; }
+.dim.g .bar i { background: var(--blue); } .dim.v .bar i { background: var(--violet); }
+.dim.f .bar i { background: var(--aqua); } .dim.p .bar i { background: var(--yellow); }
+.proxy { font-size: 10px; color: var(--ink-3); }
+.bigscore { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.bigscore .n { font-size: 38px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.bigscore .xp { color: var(--aqua); font-size: 13px; font-weight: 650; }
+.bigscore .cx { color: var(--ink-3); font-size: 12px; }
+
+.hunt { display: flex; flex-direction: column; gap: 7px; }
+.huntchip { font-size: 12px; border: 1px solid rgba(201,133,0,.5); border-radius: 10px; padding: 6px 10px; color: var(--ink-2); }
+.huntchip.hit { border-color: var(--good); color: var(--ink); background: rgba(12,163,12,.08); }
+.huntchip .k { font-family: ui-monospace, monospace; font-size: 11px; color: var(--yellow); }
+.huntchip.hit .k { color: var(--good); }
+.huntnote { font-size: 11.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.5; }
+
+.stat { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); padding: 3px 0; }
+.stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.lvl { font-size: 20px; font-weight: 750; color: var(--violet); }
+
+.svc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.svc span { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 10px; padding: 2px 9px; color: var(--ink-3); }
+.svc span.on { color: var(--aqua); border-color: rgba(25,158,112,.5); }
+
+.report { border: 1px solid rgba(144,133,233,.5); border-radius: 14px; padding: 16px 18px; margin-top: 14px;
+  background: rgba(144,133,233,.06); font-size: 14px; line-height: 1.6; }
+.report b { color: var(--violet); }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Fluent <span>Me</span></div>
+  <a class="item active" href="/">Practice</a>
+  <a class="item" href="/profile">Memory</a>
+  <div class="right" id="rightbar">a tutor that remembers you · in your own voice</div>
+</nav>
+<div class="wrap">
+  <h1>Talk. It listens, remembers, and answers back — <span style="color:var(--blue)">in your voice, fluent.</span></h1>
+  <p class="sub">Hold the button and chat with Kai. Every mistake becomes a memory card; Kai secretly steers future
+  conversation to make you face it again — spaced repetition, hidden inside small talk. Corrections are spoken in
+  <b>your own cloned voice</b>: the fluent you, already existing.</p>
+
+  <div class="cols">
+    <div>
+      <div class="panel">
+        <button class="startbtn" id="startbtn">▶ Start session</button>
+        <span class="ptt-hint" id="topstat" style="margin-left:12px"></span>
+        <div class="ptt-wrap">
+          <button class="ptt" id="ptt" disabled>HOLD<br>TO TALK</button>
+          <div class="ptt-hint" id="hint">start a session first</div>
+        </div>
+        <div class="chat" id="chat"></div>
+        <div id="reportbox"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="panel">
+        <h3>This turn</h3>
+        <div class="bigscore"><span class="n" id="comp">—</span>
+          <span class="xp" id="xp"></span><span class="cx" id="cx"></span></div>
+        <div class="dim g"><div class="row"><span>Grammar</span><b id="sg">—</b></div><div class="bar"><i id="bg"></i></div></div>
+        <div class="dim v"><div class="row"><span>Vocabulary</span><b id="sv">—</b></div><div class="bar"><i id="bv"></i></div></div>
+        <div class="dim f"><div class="row"><span>Fluency</span><b id="sf">—</b></div><div class="bar"><i id="bf"></i></div></div>
+        <div class="dim p"><div class="row"><span>Pronunciation <span class="proxy">(ASR proxy)</span></span><b id="sp">—</b></div><div class="bar"><i id="bp"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <h3>🎯 Kai is secretly hunting</h3>
+        <div class="hunt" id="hunt"><div class="huntnote">no due cards yet — make some mistakes first 😉</div></div>
+        <div class="huntnote">These are your overdue mistake-cards. Kai engineers questions whose natural answer
+        needs the pattern — answer correctly and the card levels up (10min → 1d → 3d → 7d → 21d).</div>
+      </div>
+
+      <div class="panel">
+        <h3>You</h3>
+        <div class="stat"><span>Level (estimate)</span><span class="lvl" id="lvl">—</span></div>
+        <div class="stat"><span>XP</span><b id="xptotal">0</b></div>
+        <div class="stat"><span>Active cards</span><b id="ncards">0</b></div>
+        <div class="stat"><span>Turns total</span><b id="nturns">0</b></div>
+        <div class="svc" id="svc"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let sessionOn = false, hunting = [];
+
+function fmtPat(p){ return p.replace(/-/g, " "); }
+
+async function refreshState(){
+  const s = await (await fetch("/api/state")).json();
+  $("lvl").textContent = s.level;
+  $("xptotal").textContent = s.profile.xp;
+  $("ncards").textContent = s.cards_total;
+  $("nturns").textContent = s.profile.turns_total;
+  const badges = [
+    ["mic voice sample", s.enrolled_local],
+    ["whisper", s.services.stt], ["local tts", s.services.tts_local],
+    ["elevenlabs", s.eleven_key ? (s.eleven_cloned ? true : "key only") : false],
+    ["sauna memory", s.sauna_key],
+  ];
+  $("svc").innerHTML = badges.map(([n, v]) =>
+    `<span class="${v === true ? "on" : ""}">${n}${v === "key only" ? " · clone pending" : v ? "" : " · off"}</span>`).join("");
+}
+refreshState();
+
+function renderHunt(list, hits = {}){
+  hunting = list || [];
+  if (!hunting.length){ $("hunt").innerHTML = '<div class="huntnote">no due cards — clean slate ✨</div>'; return; }
+  $("hunt").innerHTML = hunting.map(p => {
+    const hit = hits[p] === true;
+    return `<div class="huntchip ${hit ? "hit" : ""}"><span class="k">${p}</span> — ${hit ? "✓ used correctly, card leveled up!" : "waiting for a natural opening…"}</div>`;
+  }).join("");
+}
+
+function scorePanel(sc){
+  if (!sc) return;
+  const d = sc.dims || {};
+  const put = (k, sid, bid) => {
+    const v = d[k];
+    $(sid).textContent = v == null ? "n/a" : v;
+    $(bid).style.width = (v == null ? 0 : v) + "%";
+  };
+  put("grammar", "sg", "bg"); put("vocab", "sv", "bv");
+  put("fluency", "sf", "bf"); put("pron", "sp", "bp");
+  $("comp").textContent = sc.composite == null ? "—" : sc.composite;
+  $("xp").textContent = sc.xp ? `+${sc.xp} xp` : "";
+  $("cx").textContent = sc.complexity ? `ambition ×${sc.complexity}` : "";
+}
+
+function bubble(html, cls){
+  const b = document.createElement("div");
+  b.className = "bub " + cls;
+  b.innerHTML = html;
+  $("chat").prepend(b);
+  return b;
+}
+
+$("startbtn").onclick = async () => {
+  if (sessionOn){   // end
+    $("startbtn").disabled = true;
+    const r = await (await fetch("/api/session/end", {method: "POST"})).json();
+    sessionOn = false; $("ptt").disabled = true;
+    $("startbtn").disabled = false; $("startbtn").className = "startbtn"; $("startbtn").textContent = "▶ Start session";
+    $("hint").textContent = "session saved to memory";
+    $("reportbox").innerHTML = `<div class="report"><b>Session report</b> — ${r.turns} turns · avg ${r.avg ?? "—"} ·
+      +${r.xp_gained} xp · ${r.cards_created} new cards · ${r.cards_advanced} cards leveled up<br>
+      ${r.summary || ""}${r.best_moment ? `<br>🏆 best line: “${r.best_moment}”` : ""}</div>`;
+    refreshState();
+    return;
+  }
+  $("startbtn").disabled = true; $("startbtn").textContent = "waking Kai…";
+  const r = await (await fetch("/api/session/start", {method: "POST"})).json();
+  sessionOn = true;
+  $("chat").innerHTML = ""; $("reportbox").innerHTML = "";
+  $("startbtn").disabled = false; $("startbtn").className = "startbtn end"; $("startbtn").textContent = "■ End session";
+  $("ptt").disabled = false;
+  $("hint").textContent = "hold — speak English — release";
+  bubble(`<div class="who">kai</div>${r.reply}<audio controls autoplay src="${r.audio}"></audio>
+    <div class="badge">${r.engine}</div>`, "tutor");
+  renderHunt((r.briefing.due_cards || []).map(c => c.pattern));
+};
+
+let mr = null, chunks = [];
+async function startRec(){
+  if (!sessionOn || (mr && mr.state === "recording")) return;
+  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  chunks = [];
+  mr = new MediaRecorder(stream);
+  mr.ondataavailable = e => chunks.push(e.data);
+  mr.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    $("ptt").classList.remove("rec");
+    const blob = new Blob(chunks, {type: mr.mimeType});
+    if (blob.size < 2000){ $("hint").textContent = "too short — hold while you speak"; return; }
+    $("hint").textContent = "listening → grading → speaking…";
+    const fd = new FormData();
+    fd.append("file", blob, "turn.webm");
+    const r = await fetch("/api/turn", {method: "POST", body: fd});
+    const j = await r.json();
+    if (!r.ok){ $("hint").textContent = j.error || "error"; return; }
+    $("hint").textContent = "hold — speak English — release";
+
+    const errs = (j.errors || []).map(e =>
+      `<span class="errchip">${e.type} · “${e.span}” → <b>${e.correction}</b></span>`).join("");
+    let fixes = "";
+    if (j.recast) fixes += `<div class="fix"><span class="lab">recast</span>${j.recast}</div>`;
+    if (j.native && j.native !== j.recast) fixes += `<div class="fix"><span class="lab">native</span>${j.native}</div>`;
+    if (j.fix_audio) fixes += `<audio controls src="${j.fix_audio}"></audio>
+      <div class="badge">☝ your voice, fluent · ${j.fix_engine}</div>`;
+    bubble(`<div class="who">you · ${j.scores.composite ?? "—"}pts · ${j.stt_engine}</div>${j.heard}
+      ${errs ? `<div class="errchips">${errs}</div>` : ""}${fixes}`, "you");
+    if (j.reply) bubble(`<div class="who">kai</div>${j.reply}
+      <audio controls autoplay src="${j.reply_audio}"></audio><div class="badge">${j.reply_engine} · ${j.ms}ms round-trip</div>`, "tutor");
+
+    scorePanel(j.scores);
+    renderHunt(j.hunting, j.elicited);
+    $("lvl").textContent = j.level;
+    $("xptotal").textContent = j.xp;
+  };
+  mr.start();
+  $("ptt").classList.add("rec");
+  $("hint").textContent = "listening… release when done";
+}
+function stopRec(){ if (mr && mr.state === "recording") mr.stop(); }
+$("ptt").addEventListener("pointerdown", e => { e.preventDefault(); startRec(); });
+$("ptt").addEventListener("pointerup", stopRec);
+$("ptt").addEventListener("pointerleave", stopRec);
+window.addEventListener("keydown", e => { if (e.code === "Space" && !e.repeat){ e.preventDefault(); startRec(); } });
+window.addEventListener("keyup", e => { if (e.code === "Space"){ e.preventDefault(); stopRec(); } });
+</script>
+</body>
+</html>

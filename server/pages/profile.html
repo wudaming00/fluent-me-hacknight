@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluent Me — memory</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<style>
+.grid2 { display: grid; grid-template-columns: 320px 1fr; gap: 26px; align-items: start; margin-top: 8px; }
+@media (max-width: 900px){ .grid2 { grid-template-columns: 1fr; } }
+.panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; background: var(--surface); margin-bottom: 18px; }
+.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 12px; }
+.stat { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--ink-2); padding: 4px 0; }
+.stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.lvl { font-size: 22px; font-weight: 750; color: var(--violet); }
+.dim { margin-bottom: 10px; }
+.dim .row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+.bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--blue); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .7px;
+  padding: 6px 8px; border-bottom: 1px solid var(--hairline); }
+td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--ink-2); vertical-align: top; }
+td .k { font-family: ui-monospace, monospace; font-size: 12px; color: var(--yellow); }
+td .ex { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+td .ex b { color: var(--aqua); font-weight: 600; }
+.box { display: inline-flex; gap: 3px; }
+.box i { width: 9px; height: 9px; border-radius: 2px; background: var(--grid); }
+.box i.on { background: var(--aqua); }
+.due { font-size: 11px; }
+.due.now { color: var(--yellow); font-weight: 650; }
+.grad { color: var(--good); font-size: 11px; font-weight: 650; text-transform: uppercase; }
+.ep { border-left: 2px solid var(--violet); padding: 2px 0 2px 12px; margin-bottom: 14px; }
+.ep .d { font-size: 11px; color: var(--ink-3); margin-bottom: 3px; }
+.ep .s { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.ep .f { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+.ep .f b { color: var(--violet); font-weight: 600; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Fluent <span>Me</span></div>
+  <a class="item" href="/">Practice</a>
+  <a class="item active" href="/profile">Memory</a>
+  <div class="right">everything Kai knows about you</div>
+</nav>
+<div class="wrap">
+  <h1>Memory</h1>
+  <p class="sub">Three layers: mistake cards on spaced repetition, a skill profile that moves slowly and honestly,
+  and episodic memory of what you two actually talked about.</p>
+  <div class="grid2">
+    <div>
+      <div class="panel">
+        <h3>Profile</h3>
+        <div class="stat"><span>Level (estimate)</span><span class="lvl" id="lvl">—</span></div>
+        <div class="stat"><span>XP</span><b id="xp">0</b></div>
+        <div class="stat"><span>Streak</span><b id="streak">0</b></div>
+        <div class="stat"><span>Turns</span><b id="turns">0</b></div>
+        <div style="height:10px"></div>
+        <div id="skills"></div>
+      </div>
+      <div class="panel">
+        <h3>Episodes — what Kai remembers</h3>
+        <div id="eps"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Mistake cards (Leitner SRS)</h3>
+      <table>
+        <thead><tr><th>pattern</th><th>hits</th><th>srs box</th><th>next review</th></tr></thead>
+        <tbody id="cards"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+function ago(sec){
+  if (sec <= 0) return "due now";
+  const m = Math.round(sec/60); if (m < 60) return `in ${m}m`;
+  const h = Math.round(m/60); if (h < 48) return `in ${h}h`;
+  return `in ${Math.round(h/24)}d`;
+}
+(async () => {
+  const d = await (await fetch("/api/profile")).json();
+  $("lvl").textContent = d.level;
+  $("xp").textContent = d.profile.xp;
+  $("streak").textContent = d.profile.streak + "d";
+  $("turns").textContent = d.profile.turns_total;
+  $("skills").innerHTML = Object.entries(d.profile.skills).map(([k, v]) =>
+    `<div class="dim"><div class="row"><span>${k}</span><b>${v}</b></div>
+     <div class="bar"><i style="width:${v}%"></i></div></div>`).join("");
+  $("eps").innerHTML = d.episodes.map(e =>
+    `<div class="ep"><div class="d">${e.date}</div><div class="s">${e.summary || ""}</div>
+     ${(e.facts || []).length ? `<div class="f"><b>facts:</b> ${e.facts.join(" · ")}</div>` : ""}</div>`).join("")
+    || '<div class="ep"><div class="s">no sessions yet</div></div>';
+  $("cards").innerHTML = d.cards.map(c => {
+    const boxes = [0,1,2,3,4].map(i => `<i class="${i <= c.box && (c.hits || c.box) ? "on" : ""}"></i>`).join("");
+    const last = c.examples[c.examples.length - 1] || {};
+    return `<tr><td><span class="k">${c.pattern}</span><div class="ex">“${last.wrong || ""}” → <b>${last.right || ""}</b></div></td>
+      <td>${c.hits}</td>
+      <td>${c.status === "graduated" ? '<span class="grad">graduated 🎓</span>' : `<span class="box">${boxes}</span>`}</td>
+      <td><span class="due ${c.due_at <= d.now ? "now" : ""}">${c.status === "graduated" ? "—" : ago(c.due_at - d.now)}</span></td></tr>`;
+  }).join("") || '<tr><td colspan="4" style="color:var(--ink-3)">no cards yet — go practice</td></tr>';
+})();
+</script>
+</body>
+</html>

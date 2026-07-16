@@ -1,0 +1,116 @@
+/* boson-demo — dark, deliberate single theme (local interview demo) */
+:root {
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --ink-3: #898781;
+  --hairline: rgba(255, 255, 255, 0.10);
+  --grid: #2c2c2a;
+  --blue: #3987e5;
+  --aqua: #199e70;
+  --yellow: #c98500;
+  --violet: #9085e9;
+  --good: #0ca30c;
+  --critical: #d03b3b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+a { color: var(--blue); text-decoration: none; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px 64px; }
+
+/* top nav */
+nav {
+  display: flex; align-items: center; gap: 26px;
+  padding: 18px 28px; border-bottom: 1px solid var(--hairline);
+  max-width: 1240px; margin: 0 auto;
+}
+nav .brand { font-weight: 700; font-size: 15px; letter-spacing: 0.2px; color: var(--ink); }
+nav .brand span { color: var(--blue); }
+nav a.item { color: var(--ink-3); font-size: 14px; padding: 4px 2px; }
+nav a.item:hover { color: var(--ink-2); }
+nav a.item.active { color: var(--ink); border-bottom: 2px solid var(--blue); }
+nav .right { margin-left: auto; color: var(--ink-3); font-size: 12.5px; }
+
+h1 { font-size: 26px; font-weight: 700; margin: 34px 0 6px; }
+.sub { color: var(--ink-2); font-size: 14.5px; line-height: 1.55; max-width: 860px; }
+h2 { font-size: 16px; font-weight: 600; margin: 34px 0 12px; color: var(--ink); }
+
+/* cards / tiles */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 26px; }
+.card {
+  background: var(--surface); border: 1px solid var(--hairline);
+  border-radius: 10px; padding: 20px 22px; display: block; color: var(--ink);
+}
+.card:hover { border-color: rgba(255, 255, 255, 0.22); }
+.card .k { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-3); margin-bottom: 8px; }
+.card .t { font-size: 17px; font-weight: 650; margin-bottom: 6px; }
+.card .d { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+.card .proof { margin-top: 12px; font-size: 12.5px; color: var(--ink-3); }
+.card .proof b { color: var(--ink-2); font-weight: 600; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; padding: 14px 16px; }
+.tile .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--ink-3); }
+.tile .value { font-size: 26px; font-weight: 700; margin-top: 5px; }
+.tile .unit { font-size: 13px; color: var(--ink-2); font-weight: 400; margin-left: 2px; }
+.tile .note { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+/* pipeline flow */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-top: 12px; }
+.stage {
+  background: var(--surface); border: 1px solid var(--hairline); border-radius: 8px;
+  padding: 10px 14px; min-width: 128px;
+}
+.stage .s-name { font-size: 13px; font-weight: 650; }
+.stage .s-tool { font-size: 11.5px; color: var(--ink-2); margin-top: 3px; }
+.stage .s-time { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.stage .bar { height: 3px; border-radius: 2px; margin-top: 8px; }
+.arrow { align-self: center; color: var(--ink-3); font-size: 15px; }
+
+/* video compare */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+@media (max-width: 900px) { .compare { grid-template-columns: 1fr; } }
+.vbox { background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; padding: 12px; }
+.vbox video { width: 100%; border-radius: 6px; background: #000; }
+.vbox .vh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.vbox .vh .badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px;
+}
+.badge.cn { background: rgba(57, 135, 229, 0.16); color: var(--blue); }
+.badge.en { background: rgba(25, 158, 112, 0.16); color: var(--aqua); }
+.vbox .vh .vt { font-size: 13px; color: var(--ink-2); }
+
+/* transcript table */
+.ttable { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+.ttable th {
+  text-align: left; color: var(--ink-3); font-size: 11.5px; text-transform: uppercase;
+  letter-spacing: 0.7px; padding: 8px 10px; border-bottom: 1px solid var(--grid);
+}
+.ttable td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; line-height: 1.5; }
+.ttable tr:hover td { background: rgba(255, 255, 255, 0.03); cursor: pointer; }
+.ttable td.ts { color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ttable td.zh { color: var(--ink-2); width: 42%; }
+.ttable td.en { color: var(--ink); width: 46%; }
+.tscroll { max-height: 420px; overflow-y: auto; border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface); }
+
+/* status dots */
+.svc { display: flex; gap: 18px; margin: 14px 0 6px; flex-wrap: wrap; }
+.svc .s { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
+.dot.up { background: var(--good); }
+.dot.down { background: var(--critical); }
+
+.framebox { margin-top: 14px; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.framebox iframe { width: 100%; height: 640px; border: 0; display: block; background: #000; }
+.hint { font-size: 13px; color: var(--ink-3); margin-top: 10px; line-height: 1.6; }
+.hint code { background: var(--surface); border: 1px solid var(--hairline); padding: 1px 6px; border-radius: 4px; color: var(--ink-2); font-size: 12px; }
+
+audio { width: 100%; margin-top: 8px; }
+.kicker { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--blue); font-weight: 700; margin-top: 40px; }
+.footnote { color: var(--ink-3); font-size: 12.5px; margin-top: 26px; line-height: 1.6; border-top: 1px solid var(--hairline); padding-top: 14px; }

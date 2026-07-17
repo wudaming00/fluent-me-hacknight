@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluent Me — Me</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
+<style>
+.cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 22px; align-items: start; margin-top: 24px; }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+.col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; background: var(--surface); }
+.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 6px; }
+.micro { font-size: 12.5px; color: var(--ink-3); line-height: 1.55; margin-bottom: 12px; }
+.empty { font-size: 13.5px; color: var(--ink-3); padding: 10px 2px; line-height: 1.55; }
+
+/* --- toggle switch (28px, aqua on) --- */
+.sw { width: 28px; height: 16px; border-radius: 8px; border: 1px solid var(--hairline);
+  background: var(--grid); position: relative; cursor: pointer; flex: none; padding: 0;
+  transition: background .15s, border-color .15s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--ink-3); transition: left .15s, background .15s; }
+.sw.on { background: rgba(25,158,112,0.35); border-color: var(--aqua); }
+.sw.on::after { left: 14px; background: var(--aqua); }
+
+/* --- facts --- */
+.frow { display: flex; align-items: center; gap: 10px; padding: 8px 2px;
+  border-bottom: 1px solid var(--grid); font-size: 14px; }
+.frow:last-of-type { border-bottom: 0; }
+.frow .ftext { flex: 1; min-width: 0; line-height: 1.45; }
+.frow.off .ftext, .frow.off .kchip, .frow.off .fdate { opacity: .45; }
+.frow .unused { color: var(--ink-3); font-size: 12px; margin-left: 6px; }
+.kchip { font-size: 10.5px; color: var(--ink-3); border: 1px solid var(--hairline);
+  border-radius: 9px; padding: 1px 8px; flex: none; text-transform: lowercase; }
+.fdate { font-size: 11.5px; color: var(--ink-3); flex: none; font-variant-numeric: tabular-nums; }
+.xbtn { border: 0; background: none; color: var(--ink-3); font-size: 14px; cursor: pointer;
+  flex: none; padding: 2px 6px; border-radius: 6px; line-height: 1; }
+.xbtn:hover { color: var(--critical); background: rgba(208,59,59,0.12); }
+
+/* --- inputs / buttons --- */
+.addrow { display: flex; gap: 8px; margin-top: 12px; }
+input[type=text], input[type=date], select {
+  background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
+  color: var(--ink); font-size: 13.5px; padding: 7px 10px; font-family: inherit; min-width: 0; }
+input[type=text] { flex: 1; }
+input:focus, select:focus { outline: none; border-color: var(--blue); }
+input::placeholder { color: var(--ink-3); }
+input[type=date] { color-scheme: dark; }
+.btn { border: 1px solid var(--hairline); background: rgba(255,255,255,0.04); color: var(--ink-2);
+  border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+  flex: none; font-family: inherit; }
+.btn:hover { border-color: rgba(255,255,255,0.25); color: var(--ink); }
+.btn.primary { border-color: var(--blue); background: rgba(57,135,229,0.14); color: var(--ink); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* --- goals --- */
+.grow { display: flex; align-items: center; gap: 8px; padding: 9px 2px;
+  border-bottom: 1px solid var(--grid); font-size: 14px; flex-wrap: wrap; }
+.grow .glabel { flex: 1; min-width: 0; }
+.grow .gmeta { color: var(--ink-3); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.count { font-size: 12.5px; font-weight: 650; color: var(--ink-2); flex: none; }
+.count.soon { color: var(--yellow); }
+.goaladd { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.goaladd select { flex: none; }
+.goaladd input[type=text] { flex: 1 1 140px; }
+
+/* --- episodes --- */
+.ep { border-left: 3px solid var(--violet); padding: 4px 0 6px 14px; margin: 0 0 14px 4px; }
+.ep:last-child { margin-bottom: 2px; }
+.ep .edate { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums;
+  text-transform: uppercase; letter-spacing: .6px; }
+.ep .esum { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin-top: 3px; }
+.ep .efacts { font-size: 12px; color: var(--ink-3); margin-top: 4px; line-height: 1.5; }
+.ep .ebest { font-size: 12.5px; color: var(--yellow); margin-top: 4px; font-style: italic; }
+
+/* --- voice --- */
+.vrow { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--ink-2);
+  padding: 4px 0; }
+.vdot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); flex: none; }
+.vdot.ok { background: var(--good); }
+.vdot.warn { background: var(--yellow); }
+.vrow .vnote { color: var(--ink-3); font-size: 12px; }
+.vbtns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.enginebadge { font-size: 11px; color: var(--ink-3); text-transform: uppercase;
+  letter-spacing: .5px; margin-top: 6px; }
+.ghostnote { font-size: 12px; color: var(--ink-3); font-style: italic; margin-top: 3px; }
+#testaudio audio { width: 100%; margin-top: 8px; height: 32px; }
+
+.recbox { margin-top: 12px; border: 1px dashed var(--hairline); border-radius: 10px;
+  padding: 12px; text-align: center; }
+.recbtn { width: 100%; padding: 14px; border-radius: 10px; border: 2px solid var(--blue);
+  background: rgba(57,135,229,0.10); color: var(--ink); font-size: 13.5px; font-weight: 650;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none;
+  font-family: inherit; }
+.recbtn.rec { border-color: var(--critical); background: rgba(208,59,59,0.16); }
+.rechint { font-size: 12px; color: var(--ink-3); margin-top: 8px; min-height: 16px;
+  font-variant-numeric: tabular-nums; line-height: 1.5; }
+.transcript { font-size: 12.5px; color: var(--ink-2); margin-top: 8px; line-height: 1.55;
+  text-align: left; border-top: 1px solid var(--grid); padding-top: 8px; }
+.errline { font-size: 12.5px; color: var(--yellow); margin-top: 8px; line-height: 1.5; }
+
+/* --- prefs --- */
+.prefrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; }
+.prefrow .plabel { flex: 1; line-height: 1.45; }
+.seg { display: flex; border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden; flex: none; }
+.seg button { border: 0; background: none; color: var(--ink-3); font-size: 12px; padding: 6px 11px;
+  cursor: pointer; font-family: inherit; }
+.seg button.active { background: rgba(25,158,112,0.16); color: var(--aqua); font-weight: 650; }
+
+/* --- wishlist --- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.wchip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(201,133,0,0.45);
+  border-radius: 12px; padding: 4px 6px 4px 11px; font-size: 12.5px; color: var(--ink-2); }
+.wchip button { border: 0; background: rgba(25,158,112,0.14); color: var(--aqua); font-size: 10.5px;
+  border-radius: 8px; padding: 3px 8px; cursor: pointer; font-weight: 650; font-family: inherit; }
+.wchip button:hover { background: rgba(25,158,112,0.28); }
+
+/* --- sauna --- */
+.saunastatus { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+.saunastatus .s { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+.sdot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.sdot.aqua { background: var(--aqua); box-shadow: 0 0 8px rgba(25,158,112,0.6); }
+.sdot.green { background: var(--good); box-shadow: 0 0 8px rgba(12,163,12,0.6); }
+.saunabody { font-size: 13px; color: var(--ink-2); line-height: 1.55; margin-bottom: 10px; }
+.ftree { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+  color: var(--ink-2); background: var(--page); border: 1px solid var(--hairline);
+  border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+.ftree div { padding: 2px 0; white-space: nowrap; }
+.howto { display: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px; color: var(--ink-2); background: var(--page); border: 1px solid var(--hairline);
+  border-radius: 8px; padding: 10px 12px; margin-top: 10px; overflow-x: auto;
+  line-height: 1.7; white-space: pre; }
+.howto.show { display: block; }
+.saunafoot { font-size: 11.5px; color: var(--ink-3); line-height: 1.6; margin-top: 12px;
+  border-top: 1px solid var(--grid); padding-top: 9px; }
+.exportedat { font-size: 11px; color: var(--ink-3); margin-top: 6px; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Fluent <span>Me</span></div>
+  <a class="item" href="/">Practice</a>
+  <a class="item" href="/progress">Progress</a>
+  <a class="item active" href="/me">Me</a>
+  <a class="item" href="/demo">Demo</a>
+  <div class="right" id="topstats"></div>
+</nav>
+<div class="wrap">
+  <h1>Me — everything Kai knows</h1>
+  <p class="sub">You control this memory. Toggle a fact off and Kai never mentions it again.</p>
+
+  <div class="cols">
+    <!-- ================= LEFT ================= -->
+    <div class="col">
+      <div class="panel">
+        <h3>What Kai knows about you</h3>
+        <div class="micro">Learned from your conversations. Toggle off anything Kai shouldn't bring up — it stays here, but he'll never use it.</div>
+        <div id="facts"></div>
+        <div class="addrow">
+          <input type="text" id="factinput" placeholder="+ tell Kai something about you…">
+          <button class="btn" id="factadd">add</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Goals</h3>
+        <div class="micro">Deadlines drive practice. Kai suggests Interview or Presentation mode as the day approaches.</div>
+        <div id="goals"></div>
+        <div class="goaladd">
+          <select id="goalkind">
+            <option value="interview">🎯 interview</option>
+            <option value="presentation">🎤 presentation</option>
+            <option value="exam">📝 exam</option>
+            <option value="custom">📌 custom</option>
+          </select>
+          <input type="text" id="goallabel" placeholder="what's the occasion?">
+          <input type="date" id="goaldate">
+          <button class="btn" id="goaladd">add</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Episodes — what Kai remembers</h3>
+        <div id="episodes"></div>
+      </div>
+    </div>
+
+    <!-- ================= RIGHT ================= -->
+    <div class="col">
+      <div class="panel">
+        <h3>Your voice</h3>
+        <div id="voicestatus"></div>
+        <div class="vbtns">
+          <button class="btn primary" id="voicetest">▶ hear the fluent you</button>
+          <button class="btn" id="rerecord">re-record sample</button>
+        </div>
+        <div id="testaudio"></div>
+        <div class="recbox" id="recbox" style="display:none">
+          <button class="recbtn" id="recbtn">HOLD to record — read anything for 45–90s</button>
+          <div class="rechint" id="rechint">hold the button and speak; release to save (max 90s)</div>
+          <div id="enrollout"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Practice comfort</h3>
+        <div class="prefrow">
+          <button class="sw" id="gentlesw" aria-label="gentle mode"></button>
+          <span class="plabel">🌙 Gentle mode — corrections wait until the end</span>
+        </div>
+        <div class="micro" style="margin:0 0 8px 38px">Everything is still remembered — it just waits.</div>
+        <div class="prefrow">
+          <span class="plabel">Corrections voice</span>
+          <div class="seg" id="fixseg">
+            <button data-v="user">your clone</button>
+            <button data-v="tutor">Kai's voice</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Wishlist</h3>
+        <div class="micro">Words you asked about mid-conversation. Kai works them into future sessions until you own them.</div>
+        <div class="chips" id="wishlist"></div>
+        <div class="addrow">
+          <input type="text" id="wishinput" placeholder="a word or phrase you want to own">
+          <button class="btn" id="wishadd">add</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Sauna memory</h3>
+        <div class="saunastatus" id="saunastatus"></div>
+        <div class="saunabody">fluent-me mirrors its memory in Sauna's documented dual-memory format: durable workspace notes + episodic session files.</div>
+        <div class="ftree" id="ftree"></div>
+        <div class="exportedat" id="exportedat"></div>
+        <div class="vbtns">
+          <button class="btn" id="saunaexport">↻ export now</button>
+          <button class="btn" id="saunahow">how to connect</button>
+        </div>
+        <div class="howto" id="howto">1. pip install mcp &amp;&amp; python server/sauna_mcp.py  → MCP on :8902/mcp
+2. cloudflared tunnel --url http://localhost:8902
+3. Sauna → Apps → connect MCP server → paste tunnel URL
+Tools: get_learner_profile · get_due_cards · get_recent_sessions · get_progress_summary · add_identity_fact</div>
+        <div class="saunafoot">Sauna has no public memory API today — it consumes MCP servers like this one. If they ship one, this export layer becomes the push adapter.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const GOAL_ICON = { interview: "🎯", presentation: "🎤", exam: "📝", custom: "📌" };
+let ME = null;
+
+function fmtDate(ts){
+  if (!ts) return "";
+  const d = new Date(ts * 1000);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+async function post(url, body){
+  const r = await fetch(url, { method: "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  return r.json();
+}
+
+/* ============ top stats ============ */
+function renderStats(){
+  $("topstats").textContent = `${ME.level} (estimate) · ${ME.xp} xp · 🔥${ME.streak}d`;
+}
+
+/* ============ facts ============ */
+function renderFacts(){
+  const box = $("facts");
+  const facts = ME.facts || [];
+  if (!facts.length){
+    box.innerHTML = '<div class="empty">Kai learns you as you talk — facts land here after your first session. Or tell him one now.</div>';
+    return;
+  }
+  box.innerHTML = facts.map((f, i) => `
+    <div class="frow ${f.use ? "" : "off"}">
+      <button class="sw ${f.use ? "on" : ""}" data-i="${i}" aria-label="use fact"></button>
+      <span class="ftext">${esc(f.text)}${f.use ? "" : '<span class="unused">(won’t be used)</span>'}</span>
+      <span class="kchip">${esc(f.kind || "other")}</span>
+      <span class="fdate" title="${esc(f.src || "")}">${fmtDate(f.ts)}</span>
+      <button class="xbtn" data-del="${i}" title="delete forever">✕</button>
+    </div>`).join("");
+  box.querySelectorAll(".sw").forEach(el => el.onclick = async () => {
+    const f = facts[+el.dataset.i];
+    const j = await post("/api/me/fact", { text: f.text, use: !f.use });
+    ME.facts = j.facts; renderFacts();
+  });
+  box.querySelectorAll(".xbtn").forEach(el => el.onclick = async () => {
+    const f = facts[+el.dataset.del];
+    const j = await post("/api/me/fact", { text: f.text, delete: true });
+    ME.facts = j.facts; renderFacts();
+  });
+}
+$("factadd").onclick = addFact;
+$("factinput").addEventListener("keydown", e => { if (e.key === "Enter") addFact(); });
+async function addFact(){
+  const t = $("factinput").value.trim();
+  if (!t) return;
+  $("factinput").value = "";
+  const j = await post("/api/me/fact", { add: t, kind: "other" });
+  ME.facts = j.facts; renderFacts();
+}
+
+/* ============ goals ============ */
+function daysUntil(dateStr){
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  const target = new Date(y, m - 1, d);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((target - today) / 86400000);
+}
+function renderGoals(){
+  const box = $("goals");
+  const goals = ME.goals || [];
+  if (!goals.length){
+    box.innerHTML = '<div class="empty">No goals yet — give Kai a date to aim at.</div>';
+    return;
+  }
+  box.innerHTML = goals.map((g, i) => {
+    const n = daysUntil(g.date);
+    let cd = "";
+    if (n !== null){
+      if (n === 0) cd = '<span class="count soon">today</span>';
+      else if (n < 0) cd = `<span class="count" style="opacity:.55">${-n}d ago</span>`;
+      else cd = `<span class="count ${n <= 7 ? "soon" : ""}">in ${n} day${n === 1 ? "" : "s"}</span>`;
+    }
+    return `<div class="grow">
+      <span>${GOAL_ICON[g.kind] || "📌"}</span>
+      <span class="gmeta">${esc(g.kind)}</span>
+      <span class="glabel">${esc(g.label)}</span>
+      <span class="gmeta">${esc(g.date)}</span>
+      ${cd}
+      <button class="xbtn" data-gid="${esc(g.id)}" title="remove goal">✕</button>
+    </div>`;
+  }).join("");
+  box.querySelectorAll(".xbtn").forEach(el => el.onclick = async () => {
+    const j = await post("/api/me/goal", { id: el.dataset.gid, delete: true });
+    ME.goals = j.goals; renderGoals();
+  });
+}
+$("goaladd").onclick = async () => {
+  const label = $("goallabel").value.trim();
+  const date = $("goaldate").value;
+  if (!label || !date) { $("goallabel").placeholder = "need a label and a date…"; return; }
+  const j = await post("/api/me/goal", {
+    kind: $("goalkind").value, label, date, active: true });
+  ME.goals = j.goals;
+  $("goallabel").value = "";
+  renderGoals();
+};
+
+/* ============ episodes ============ */
+function renderEpisodes(){
+  const box = $("episodes");
+  const eps = ME.episodes || [];
+  if (!eps.length){
+    box.innerHTML = '<div class="empty">No sessions yet.</div>';
+    return;
+  }
+  box.innerHTML = eps.map(e => {
+    const facts = (e.facts || []).map(f => esc(f.text || f)).join(" · ");
+    return `<div class="ep">
+      <div class="edate">${esc(e.date || fmtDate(e.ts))}</div>
+      <div class="esum">${esc(e.summary || "")}</div>
+      ${facts ? `<div class="efacts">${facts}</div>` : ""}
+      ${e.best_moment ? `<div class="ebest">🏆 “${esc(e.best_moment)}”</div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+/* ============ voice ============ */
+function renderVoice(){
+  const v = ME.voice || {};
+  let rows = `<div class="vrow">
+    <span class="vdot ${v.enrolled_local ? "ok" : ""}"></span>
+    voice sample ${v.enrolled_local ? "" : '<span class="vnote">not recorded</span>'}
+  </div>`;
+  let clone;
+  if (v.eleven_cloned)
+    clone = '<span class="vdot ok"></span> ElevenLabs clone';
+  else if (v.eleven_key)
+    clone = '<span class="vdot warn"></span> ElevenLabs clone <span class="vnote">key ok — clone not created (free tier can’t clone: needs Starter)</span>';
+  else
+    clone = '<span class="vdot"></span> ElevenLabs clone <span class="vnote">no key</span>';
+  rows += `<div class="vrow">${clone}</div>`;
+  $("voicestatus").innerHTML = rows;
+}
+
+$("voicetest").onclick = async () => {
+  const btn = $("voicetest");
+  btn.disabled = true; btn.textContent = "generating…";
+  try {
+    const j = await post("/api/voice/test", {});
+    const box = $("testaudio");
+    box.innerHTML = "";
+    const a = new Audio(j.audio);
+    a.controls = true; a.autoplay = true;
+    box.appendChild(a);
+    const badge = document.createElement("div");
+    badge.className = "enginebadge";
+    badge.textContent = j.engine || "";
+    box.appendChild(badge);
+    if (!String(j.engine || "").startsWith("elevenlabs")){
+      const gn = document.createElement("div");
+      gn.className = "ghostnote";
+      gn.textContent = "(local/fallback voice — clone offline)";
+      box.appendChild(gn);
+    }
+  } catch (e) {
+    $("testaudio").innerHTML = '<div class="ghostnote">voice test failed — is the server up?</div>';
+  }
+  btn.disabled = false; btn.textContent = "▶ hear the fluent you";
+};
+
+/* --- re-record: hold-to-record enrollment --- */
+$("rerecord").onclick = () => {
+  const box = $("recbox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+};
+
+let mr = null, chunks = [], recT0 = 0, recTimer = null;
+async function startEnrollRec(){
+  if (mr && mr.state === "recording") return;
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { $("rechint").textContent = "microphone blocked — allow mic access and try again"; return; }
+  chunks = [];
+  mr = new MediaRecorder(stream);
+  mr.ondataavailable = e => chunks.push(e.data);
+  mr.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    clearInterval(recTimer);
+    $("recbtn").classList.remove("rec");
+    $("recbtn").textContent = "HOLD to record — read anything for 45–90s";
+    const blob = new Blob(chunks, { type: mr.mimeType });
+    if (blob.size < 4000){ $("rechint").textContent = "too short — hold the button while you read"; return; }
+    $("rechint").textContent = "transcribing your sample…";
+    const fd = new FormData();
+    fd.append("file", blob, "enroll.webm");
+    let r, j;
+    try {
+      r = await fetch("/api/enroll", { method: "POST", body: fd });
+      j = await r.json();
+    } catch (e) { $("rechint").textContent = "upload failed"; return; }
+    if (!r.ok){ $("rechint").textContent = j.error || "enrollment failed"; return; }
+    $("rechint").textContent = "sample saved ✓";
+    ME.voice.enrolled_local = true;
+    renderVoice();
+    const excerpt = j.transcript.length > 140 ? j.transcript.slice(0, 140) + "…" : j.transcript;
+    let out = `<div class="transcript">heard: “${esc(excerpt)}”<br>
+      <span style="color:var(--ink-3)">${j.words} words · ${Math.round(j.dur)}s of speech</span></div>`;
+    if (ME.voice.eleven_key && !ME.voice.eleven_cloned)
+      out += '<div class="vbtns"><button class="btn primary" id="clonebtn">create ElevenLabs clone</button></div><div id="cloneout"></div>';
+    $("enrollout").innerHTML = out;
+    const cb = $("clonebtn");
+    if (cb) cb.onclick = async () => {
+      cb.disabled = true; cb.textContent = "cloning…";
+      const cr = await fetch("/api/enroll/eleven", { method: "POST" });
+      const cj = await cr.json();
+      if (cr.ok && cj.voice_id){
+        ME.voice.eleven_cloned = true; ME.voice.voice_id = cj.voice_id;
+        renderVoice();
+        $("cloneout").innerHTML = '<div class="transcript" style="color:var(--aqua)">clone created ✓ — corrections can now speak in your voice</div>';
+        cb.remove();
+      } else {
+        cb.disabled = false; cb.textContent = "create ElevenLabs clone";
+        $("cloneout").innerHTML = cj.reason === "tier"
+          ? '<div class="errline">ElevenLabs free tier can’t clone — upgrade to Starter or grab a hackathon credit key.</div>'
+          : `<div class="errline">${esc(cj.error || "clone failed")}</div>`;
+      }
+    };
+  };
+  mr.start();
+  recT0 = Date.now();
+  $("recbtn").classList.add("rec");
+  $("recbtn").textContent = "recording… release to stop";
+  recTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - recT0) / 1000);
+    $("rechint").textContent = `recording ${s}s / 90s max`;
+    if (s >= 90) stopEnrollRec();
+  }, 250);
+}
+function stopEnrollRec(){ if (mr && mr.state === "recording") mr.stop(); }
+$("recbtn").addEventListener("pointerdown", e => { e.preventDefault(); startEnrollRec(); });
+$("recbtn").addEventListener("pointerup", stopEnrollRec);
+$("recbtn").addEventListener("pointerleave", stopEnrollRec);
+
+/* ============ prefs ============ */
+function renderPrefs(){
+  $("gentlesw").classList.toggle("on", !!ME.gentle_mode);
+  $("fixseg").querySelectorAll("button").forEach(b =>
+    b.classList.toggle("active", b.dataset.v === ME.fix_voice));
+}
+$("gentlesw").onclick = async () => {
+  ME.gentle_mode = !ME.gentle_mode;
+  renderPrefs();
+  await post("/api/me/prefs", { gentle_mode: ME.gentle_mode });
+};
+$("fixseg").querySelectorAll("button").forEach(b => b.onclick = async () => {
+  ME.fix_voice = b.dataset.v;
+  renderPrefs();
+  await post("/api/me/prefs", { fix_voice: ME.fix_voice });
+});
+
+/* ============ wishlist ============ */
+function renderWishlist(){
+  const box = $("wishlist");
+  const wl = ME.wishlist || [];
+  if (!wl.length){
+    box.innerHTML = '<div class="empty">Nothing here — ask Kai “how do I say…” mid-conversation and it lands here.</div>';
+    return;
+  }
+  box.innerHTML = wl.map((w, i) =>
+    `<span class="wchip">${esc(w)}<button data-i="${i}">learned ✓</button></span>`).join("");
+  box.querySelectorAll("button").forEach(el => el.onclick = async () => {
+    const j = await post("/api/me/wishlist", { remove: wl[+el.dataset.i] });
+    ME.wishlist = j.wishlist; renderWishlist();
+  });
+}
+$("wishadd").onclick = addWish;
+$("wishinput").addEventListener("keydown", e => { if (e.key === "Enter") addWish(); });
+async function addWish(){
+  const t = $("wishinput").value.trim();
+  if (!t) return;
+  $("wishinput").value = "";
+  const j = await post("/api/me/wishlist", { add: t });
+  ME.wishlist = j.wishlist; renderWishlist();
+}
+
+/* ============ sauna ============ */
+function renderSauna(){
+  const s = ME.sauna || {};
+  let st = '<span class="s"><span class="sdot aqua"></span>local · Sauna-ready</span>';
+  if (s.mcp_running)
+    st += `<span class="s"><span class="sdot green"></span>MCP server live on :${s.mcp_port || 8902}</span>`;
+  $("saunastatus").innerHTML = st;
+  $("ftree").innerHTML = (s.files || []).map(f => `<div>📄 ${esc(f)}</div>`).join("")
+    || '<div style="color:var(--ink-3)">nothing exported yet</div>';
+  $("exportedat").textContent = s.exported_at
+    ? "last export: " + new Date(s.exported_at * 1000).toLocaleString() : "";
+}
+$("saunaexport").onclick = async () => {
+  const btn = $("saunaexport");
+  btn.disabled = true; btn.textContent = "exporting…";
+  const j = await post("/api/sauna/export", {});
+  ME.sauna.files = j.files; ME.sauna.exported_at = j.exported_at;
+  renderSauna();
+  btn.disabled = false; btn.textContent = "↻ export now";
+};
+$("saunahow").onclick = () => $("howto").classList.toggle("show");
+
+/* ============ boot ============ */
+async function load(){
+  ME = await (await fetch("/api/me")).json();
+  renderStats(); renderFacts(); renderGoals(); renderEpisodes();
+  renderVoice(); renderPrefs(); renderWishlist(); renderSauna();
+}
+load();
+</script>
+</body>
+</html>

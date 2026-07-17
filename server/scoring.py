@@ -45,14 +45,65 @@ def fluency_score(stt: dict, text: str):
 
 
 def pron_score(stt: dict, text: str):
+    """ASR 置信度 → pron 代理分。两套标定 (分布不同): whisper avg_logprob vs Scribe v2 词级 logprob。
+    仍是 proxy, 界面照旧标注; Scribe 路径额外产出低置信词表 (词级发音标注)。"""
     words = [w for w in text.split() if w]
     if len(words) < MIN_WORDS:
         return None, {"note": "sample too short"}
     lp = stt.get("avg_logprob")
     if lp is None:
         return None, {"note": "no confidence signal"}
-    conf = max(0.0, min(1.0, (lp + 1.0) / 0.9))   # [-1,-0.1] → [0,1], 沿用 mirror 标定
+    if stt.get("conf_source") == "scribe":
+        # Scribe v2 词级 logprob: 0 最自信。经验带 [-0.02, -0.5] → [100, 0] 线性
+        conf = max(0.0, min(1.0, 1.0 - (abs(lp) - 0.02) / 0.48))
+        unclear = [w["text"] for w in stt.get("words", [])
+                   if w.get("logprob") is not None and w["logprob"] < -0.35][:6]
+        return round(100 * conf), {"avg_logprob": round(lp, 3), "proxy": True,
+                                   "unclear_words": unclear}
+    conf = max(0.0, min(1.0, (lp + 1.0) / 0.9))   # whisper: [-1,-0.1] → [0,1], 沿用 mirror 标定
     return round(100 * conf), {"avg_logprob": round(lp, 3), "proxy": True}
+
+
+def _tokens(text: str) -> list:
+    return [w for w in re.sub(r"[^a-z0-9' ]", " ", text.lower()).split() if w]
+
+
+def token_overlap(a: str, b: str) -> float:
+    """无序 token 重叠率 |A∩B| / min(|A|,|B|) — echo 形式核对用 (recast 被包含即算说到位)。"""
+    ta, tb = _tokens(a), _tokens(b)
+    if not ta or not tb:
+        return 0.0
+    from collections import Counter
+    inter = sum((Counter(ta) & Counter(tb)).values())
+    return inter / min(len(ta), len(tb))
+
+
+def is_parrot(heard: str, recast: str) -> bool:
+    """防鹦鹉: 学员本轮是否只是复读上一条 recast。分母用学员句长 —
+    把纠正自然嵌进更长的句子 (恰恰是想奖励的行为) 不算复读。"""
+    th, tr = _tokens(heard), _tokens(recast)
+    if not th or not tr:
+        return False
+    from collections import Counter
+    inter = sum((Counter(th) & Counter(tr)).values())
+    return inter / len(th) >= 0.75 and len(th) <= len(tr) + 3
+
+
+def echo_compare(echo_stt: dict, echo_text: str, recast: str, orig: dict) -> dict:
+    """echo 跟读 vs 目标句 + vs 首次尝试。纯本地信号, 无 LLM。
+    结果只报方向 + 粗 delta (措辞: rough single-sentence signal, 不装精度)。"""
+    match = token_overlap(echo_text, recast)
+    passed = match >= 0.8
+    out = {"match": round(match, 2), "passed": passed, "heard": echo_text}
+    fl, fl_meta = fluency_score(echo_stt, echo_text)
+    pr, pr_meta = pron_score(echo_stt, echo_text)
+    if fl is not None and orig.get("fl") is not None:
+        out["fluency_delta"] = fl - orig["fl"]
+    if pr is not None and orig.get("pr") is not None:
+        out["pron_delta"] = pr - orig["pr"]
+    if fl_meta.get("fillers") is not None and orig.get("fillers") is not None:
+        out["fillers_delta"] = fl_meta["fillers"] - orig["fillers"]
+    return out
 
 
 def compose_turn(judge: dict, fl, pr, n_words: int) -> dict:

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluent Me — demo</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
+<style>
+/* demo 页只补 boson 骨架没有的两样: 节奏条 + 对比框里的音频布局 */
+.rstrip { position: relative; height: 30px; margin-top: 10px; background: rgba(255,255,255,.03);
+  border: 1px solid var(--grid); border-radius: 8px; overflow: hidden; }
+.rw { position: absolute; top: 4px; bottom: 4px; border-radius: 4px; background: rgba(57,135,229,.28);
+  border: 1px solid rgba(57,135,229,.45); font-size: 9px; color: var(--ink-2); overflow: hidden;
+  display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.rw.fz { background: rgba(208,59,59,.22); border-color: rgba(208,59,59,.55); }
+.rw.fill { background: rgba(144,133,233,.18); border-style: dashed; border-color: rgba(144,133,233,.6); }
+.rp { position: absolute; top: 4px; bottom: 4px; border-radius: 4px;
+  background: repeating-linear-gradient(45deg, rgba(201,133,0,.18), rgba(201,133,0,.18) 4px, transparent 4px, transparent 8px);
+  border: 1px dashed rgba(201,133,0,.55); font-size: 9px; color: var(--yellow);
+  display: flex; align-items: center; justify-content: center; }
+.vbox .vt2 { font-size: 13.5px; color: var(--ink); line-height: 1.6; margin: 4px 0 2px; }
+.pchip { font-size: 10.5px; font-family: ui-monospace, monospace; border: 1px solid rgba(201,133,0,.5);
+  border-radius: 9px; padding: 1px 8px; color: var(--yellow); white-space: nowrap; }
+.emptyc { color: var(--ink-3); font-size: 13px; padding: 26px 10px; text-align: center; line-height: 1.6; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Fluent <span>Me</span></div>
+  <a class="item" href="/">Practice</a>
+  <a class="item" href="/progress">Progress</a>
+  <a class="item" href="/me">Me</a>
+  <a class="item active" href="/demo">Demo</a>
+  <div class="right">ElevenLabs × Sauna Hack Night · 2026-07-16</div>
+</nav>
+<div class="wrap">
+
+  <h1>A tutor that <span style="color:var(--violet)">remembers you</span> — and answers in
+  <span style="color:var(--blue)">your own voice, fluent.</span></h1>
+  <p class="sub">Every mistake becomes a memory with its own forgetting curve. Kai engineers the next
+  conversation so you face it again right before you'd lose it — spaced repetition hidden inside small talk,
+  never a flashcard. Corrections come back in your cloned voice: <b>the fluent you, already existing.</b></p>
+
+  <div class="svc" id="svc"></div>
+
+  <div class="kicker">How one spoken turn works</div>
+  <div class="flow" id="flow"></div>
+  <div class="hint" id="flowhint"></div>
+
+  <div class="kicker">Tonight's numbers</div>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="kicker">The money shot — you vs. the fluent you</div>
+  <div class="compare" id="compare"></div>
+
+  <div class="kicker">What Kai remembers — mistakes as living memory</div>
+  <div class="tscroll"><table class="ttable" id="ttable">
+    <thead><tr><th>when</th><th>you said</th><th>the fluent you</th><th>pattern → SRS</th></tr></thead>
+    <tbody id="trows"></tbody>
+  </table></div>
+
+  <div class="kicker">Why it's different</div>
+  <div class="cards">
+    <div class="card"><div class="k">memory</div><div class="t">Conversational spaced repetition</div>
+      <div class="d">Errors become pattern-cards on an FSRS-inspired schedule. Kai never shows a flashcard —
+      he asks a question whose natural answer <i>requires</i> the pattern.</div>
+      <div class="proof"><b>R(t)=1/(1+t/9S)</b> · review lands at ~90% retention · lapse keeps 30% stability</div></div>
+    <div class="card"><div class="k">voice</div><div class="t">The fluent you, already existing</div>
+      <div class="d">Corrections are spoken by your own ElevenLabs clone. Speech research suggests a
+      native-accented version of your own voice is an unusually effective imitation target.</div>
+      <div class="proof">enroll 60s → IVC clone → every recast is <b>you</b></div></div>
+    <div class="card"><div class="k">production</div><div class="t">Echo loop — try it on</div>
+      <div class="d">After hearing the fluent you, hold the button and say it back. Scored only against
+      yourself-five-seconds-ago: the one comparison that can't hurt.</div>
+      <div class="proof">rhythm strips: pauses & fillers visibly vanish between takes</div></div>
+    <div class="card"><div class="k">acoustics</div><div class="t">Rhythm made visible</div>
+      <div class="d">Scribe v2 word timestamps + confidence drive a per-utterance timeline: word durations,
+      &gt;0.5s pauses, fillers, fuzzy words — the anatomy of your fluency, every turn.</div>
+      <div class="proof">pace band 1.8–3.4 w/s · pause ratio · per-word confidence (ASR proxy)</div></div>
+    <div class="card"><div class="k">real life</div><div class="t">Your life is the curriculum</div>
+      <div class="d">Identity facts Kai learns generate personalized scenes, mock interviews (STAR + your
+      polished answer in your voice) and presentation rehearsal with timing coach + hostile Q&A.</div>
+      <div class="proof">5 modes · goals drive suggestions · facts are toggleable on /me</div></div>
+    <div class="card"><div class="k">sauna</div><div class="t">Memory that Sauna can drink</div>
+      <div class="d">Sauna consumes MCP servers — so Kai's memory <i>is one</i>: profile, due cards, sessions,
+      plus write-back. Also mirrored in Sauna's documented dual-memory workspace format.</div>
+      <div class="proof">MCP :8902 · 5 tools · workspace markdown export · honest "local · Sauna-ready"</div></div>
+  </div>
+
+  <div class="kicker">Live</div>
+  <div class="framebox"><iframe src="/" title="fluent-me live"></iframe></div>
+  <div class="hint">demo drama: <code>curl -X POST :8901/api/dev/expire</code> makes every card due with
+  visibly decayed memory bars · <code>/api/dev/seed</code> restores the seeded state · MCP:
+  <code>python server/sauna_mcp.py</code> + <code>cloudflared tunnel --url http://localhost:8902</code></div>
+
+  <div class="footnote">Honesty ledger: pronunciation is an ASR-confidence proxy (labeled everywhere) ·
+  CEFR is an estimate from conversation scoring, not a certified test · FSRS constants are hand-picked
+  defaults, not a fitted model · progress charts may include seeded demo data (tagged on-page) ·
+  interview feedback is coaching, never a hiring assessment · timings below each stage were measured
+  tonight on this laptop.</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const FILLER_RE = /^(um+|uh+|erm+|hmm+|like)$/i;
+
+function rhythmStrip(words){
+  if (!words || words.length < 2) return "";
+  const t0 = words[0].start, total = Math.max(words[words.length-1].end - t0, 0.5);
+  const px = t => ((t - t0) / total * 100).toFixed(2) + "%";
+  const wd = (a,b) => Math.max((b - a) / total * 100, 0.8).toFixed(2) + "%";
+  let h = "";
+  words.forEach((w, i) => {
+    const fill = FILLER_RE.test(w.text), fz = !fill && w.logprob != null && w.logprob < -0.35;
+    h += `<span class="rw${fz?" fz":""}${fill?" fill":""}" style="left:${px(w.start)};width:${wd(w.start,w.end)}">${esc(w.text)}</span>`;
+    if (i < words.length - 1){
+      const gap = words[i+1].start - w.end;
+      if (gap > 0.5) h += `<span class="rp" style="left:${px(w.end)};width:${wd(w.end,words[i+1].start)}">${gap.toFixed(1)}s</span>`;
+    }
+  });
+  return `<div class="rstrip">${h}</div>`;
+}
+
+const STAGES = [
+  ["Push-to-talk", "browser · MediaRecorder + live waveform", "0 ms dead air", "var(--ink-3)"],
+  ["Scribe v2 STT", "ElevenLabs · word timestamps + confidence", "~0.9 s → transcript on screen", "var(--blue)"],
+  ["Judge — one call", "Claude Opus · reply + errors + habits + scores", "~8 s (measured tonight)", "var(--violet)"],
+  ["Memory write", "FSRS-lite · cards / profile / episodes / identity", "<1 ms · exactly once", "var(--aqua)"],
+  ["Dual TTS", "flash v2.5 · Kai + your clone in parallel", "~0.6 s", "var(--yellow)"],
+  ["NDJSON stream", "each stage paints the moment it lands", "perceived wait ≈ reading time", "var(--good)"],
+];
+
+function renderFlow(){
+  $("flow").innerHTML = STAGES.map((s, i) =>
+    `<div class="stage"><div class="s-name">${s[0]}</div><div class="s-tool">${s[1]}</div>
+     <div class="s-time">${s[2]}</div><div class="bar" style="background:${s[3]}"></div></div>` +
+    (i < STAGES.length - 1 ? '<span class="arrow">→</span>' : "")).join("");
+  $("flowhint").textContent = "One Claude call per turn is the latency covenant — scenario beats, interview STAR grading and presentation clarity all ride the same call.";
+}
+
+async function load(){
+  let st = {}, demo = {};
+  try { st = await (await fetch("/api/state")).json(); } catch {}
+  try { demo = await (await fetch("/api/demo")).json(); } catch {}
+
+  const dots = [
+    ["server :8901", true],
+    ["elevenlabs", st.eleven_key],
+    ["voice clone", st.eleven_cloned],
+    ["judge · " + (st.judge || "?") + (st.judge === "cli" ? " (opus)" : ""), st.judge && st.judge !== "cli" || st.judge === "cli"],
+    ["sauna mcp :8902", st.services && st.services.sauna_mcp],
+    ["local whisper fallback", st.services && st.services.stt_local],
+  ];
+  $("svc").innerHTML = dots.map(([n, up]) =>
+    `<span class="s"><span class="dot ${up ? "up" : "down"}"></span>${n}</span>`).join("");
+
+  renderFlow();
+
+  const p = demo.profile || {};
+  const cards = demo.cards || {};
+  $("tiles").innerHTML = `
+    <div class="tile"><div class="label">transcript on screen</div><div class="value">0.9<span class="unit">s</span></div><div class="note">measured tonight · Scribe v2</div></div>
+    <div class="tile"><div class="label">full round trip</div><div class="value">~10<span class="unit">s</span></div><div class="note">STT → Opus judge → dual TTS</div></div>
+    <div class="tile"><div class="label">review scheduling</div><div class="value">R=0.90</div><div class="note">FSRS-inspired defaults, not a fitted model</div></div>
+    <div class="tile"><div class="label">mistake cards</div><div class="value">${cards.learning ?? 0}<span class="unit">live</span></div><div class="note">${cards.graduated ?? 0} graduated 🎓</div></div>
+    <div class="tile"><div class="label">spoken turns</div><div class="value">${p.turns ?? 0}</div><div class="note">level ${p.level ?? "—"} (estimate)</div></div>
+    <div class="tile"><div class="label">anti-grind XP</div><div class="value">${p.xp ?? 0}</div><div class="note">xp = score × sentence ambition</div></div>`;
+
+  const L = demo.latest;
+  if (L){
+    $("compare").innerHTML = `
+      <div class="vbox"><div class="vh"><span class="badge cn">YOU · FIRST TRY</span><span class="vt">${L.words && L.words.length ? "with the pauses and all" : ""}</span></div>
+        <div class="vt2">“${esc(L.heard)}”</div>
+        <audio controls src="${L.orig_audio}"></audio>
+        ${rhythmStrip(L.words)}</div>
+      <div class="vbox"><div class="vh"><span class="badge en">${L.own_voice ? "YOU, FLUENT · YOUR CLONE" : "FLUENT VERSION · KAI'S VOICE"}</span><span class="vt">${esc(L.engine || "")}</span></div>
+        <div class="vt2">“${esc(L.fix_text)}”</div>
+        <audio controls src="${L.fix_audio}"></audio>
+        <div class="hint" style="margin-top:8px">${L.own_voice ? "same voice, same person — just further along" : "enroll + clone on /me to hear yourself instead"}</div></div>`;
+  } else {
+    $("compare").innerHTML = `<div class="vbox emptyc">play one turn on <a href="/">Practice</a> —
+      the latest “you vs. fluent you” pair lands here automatically</div>
+      <div class="vbox emptyc">🎙 → 🗣</div>`;
+  }
+
+  const rows = demo.rows || [];
+  $("trows").innerHTML = rows.length ? rows.map(r => {
+    const d = new Date((r.ts || 0) * 1000);
+    const ts = (d.getMonth()+1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    return `<tr><td class="ts">${ts}</td><td class="zh">“${esc(r.wrong)}”</td><td class="en">${esc(r.right)}</td>
+      <td><span class="pchip">${esc(r.pattern)}</span></td></tr>`;
+  }).join("") : `<tr><td colspan="4" style="color:var(--ink-3)">no mistakes yet — Kai hasn't caught you</td></tr>`;
+}
+load();
+</script>
+</body>
+</html>

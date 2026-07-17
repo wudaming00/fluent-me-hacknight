@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluent Me — Progress</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
+<style>
+/* ---------- layout ---------- */
+.pagehead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.demotag { flex: none; margin-top: 38px; font-size: 11px; color: var(--ink-3);
+  border: 1px solid var(--hairline); border-radius: 12px; padding: 3px 10px; white-space: nowrap; }
+
+.panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px;
+  background: var(--surface); margin-top: 18px; }
+.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 12px; }
+
+.tiles { margin-top: 22px; }
+.tile .value { font-variant-numeric: tabular-nums; }
+.tile.wide { grid-column: 1 / -1; }
+.minibar { height: 5px; border-radius: 3px; background: var(--grid); overflow: hidden; margin-top: 8px; }
+.minibar i { display: block; height: 100%; border-radius: 3px; background: var(--violet); }
+
+.band2 { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.band2 .panel { margin-top: 0; }
+@media (max-width: 900px) { .band2 { grid-template-columns: 1fr; } }
+
+.emptymsg { color: var(--ink-3); font-size: 13px; padding: 8px 0; line-height: 1.6; }
+
+/* ---------- CEFR gauge ---------- */
+.plateau { display: inline-block; margin-left: 10px; font-size: 10.5px; letter-spacing: .4px;
+  text-transform: none; color: var(--violet); border: 1px solid rgba(144,133,233,.5);
+  border-radius: 12px; padding: 2px 9px; }
+.cefrstrip { position: relative; display: flex; margin-top: 20px; }
+.cefrstrip .seg { flex: 1; height: 12px; background: var(--grid); }
+.cefrstrip .seg + .seg { border-left: 2px solid var(--surface); }
+.cefrstrip .seg:first-child { border-radius: 6px 0 0 6px; }
+.cefrstrip .seg:last-child { border-radius: 0 6px 6px 0; }
+.cefrstrip .seg.done { background: rgba(144,133,233,.35); }
+.cefrstrip .seg.cur { background: var(--violet); }
+.cefrmark { position: absolute; top: -15px; transform: translateX(-50%); font-size: 10px; color: var(--ink-2); }
+.cefrlabels { display: flex; margin-top: 5px; }
+.cefrlabels span { flex: 1; text-align: center; font-size: 10.5px; color: var(--ink-3); letter-spacing: .5px; }
+.cefrlabels span.cur { color: var(--violet); font-weight: 700; }
+.cefrline { font-size: 12.5px; color: var(--ink-2); margin-top: 9px; font-variant-numeric: tabular-nums; }
+.cefrnote { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
+
+/* ---------- charts ---------- */
+.chartbox { position: relative; }
+.chartbox svg { width: 100%; height: auto; display: block; }
+.chartbox svg text { user-select: none; }
+.chartbox .xpsvg { margin-top: 6px; }
+.hint2 { font-size: 12.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.6; }
+
+#tip { position: fixed; z-index: 50; display: none; background: #141413;
+  border: 1px solid rgba(255,255,255,.18); border-radius: 7px; padding: 6px 10px;
+  font-size: 12px; color: var(--ink-2); pointer-events: none; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
+#tip b { color: var(--ink); }
+
+/* ---------- skills ---------- */
+.skrow { display: grid; grid-template-columns: minmax(64px, 1fr) minmax(90px, 150px) 44px minmax(46px, 56px);
+  gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+.skrow:last-of-type { border-bottom: 0; }
+.skrow svg { width: 100%; max-width: 150px; height: auto; display: block; }
+.sklabel { font-size: 13px; color: var(--ink-2); }
+.proxy { font-size: 10px; color: var(--ink-3); }
+.skval { font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
+.skdelta { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- calendar ---------- */
+.calwrap { overflow-x: auto; }
+.callegend { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--ink-3); margin-top: 8px; }
+.callegend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* ---------- sessions ---------- */
+.srow { padding: 10px 2px; border-bottom: 1px solid var(--grid); font-size: 13.5px;
+  color: var(--ink-2); cursor: pointer; line-height: 1.55; }
+.srow:hover { background: rgba(255,255,255,.03); }
+.srow b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.sdate { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mchip { font-size: 10.5px; border: 1px solid rgba(57,135,229,.45); color: var(--ink-2);
+  border-radius: 10px; padding: 1px 8px; }
+.sdet { padding: 10px 12px 14px; border-bottom: 1px solid var(--grid);
+  background: rgba(255,255,255,.02); font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.best { color: var(--violet); margin-top: 6px; }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pchip { font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border-radius: 10px; padding: 2px 9px; color: var(--ink-2); }
+.pchip.new { border: 1px solid rgba(201,133,0,.55); }
+.pchip.adv { border: 1px solid rgba(12,163,12,.55); }
+.sb { display: grid; grid-template-columns: 110px 1fr 44px; gap: 8px; align-items: center;
+  margin-top: 5px; max-width: 360px; font-size: 12px; }
+.sb .sbar { height: 5px; background: var(--grid); border-radius: 3px; overflow: hidden; }
+.sb .sbar i { display: block; height: 100%; border-radius: 3px; }
+.sb b { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- card wall ---------- */
+.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.fchip { font-size: 12px; border: 1px solid var(--hairline); background: transparent;
+  color: var(--ink-2); border-radius: 14px; padding: 4px 12px; cursor: pointer; font-family: inherit; }
+.fchip:hover { color: var(--ink); }
+.fchip.active { border-color: var(--blue); color: var(--ink); }
+.chiprow select { margin-left: auto; background: var(--page); color: var(--ink-2);
+  border: 1px solid var(--hairline); border-radius: 8px; padding: 4px 8px; font-size: 12px; font-family: inherit; }
+.wall, .trophies { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.mcard { border: 1px solid var(--hairline); border-radius: 10px; padding: 12px 14px; background: rgba(255,255,255,.02); }
+.mcard.archived { opacity: .55; }
+.mhead { display: flex; align-items: baseline; gap: 6px; }
+.pat { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--yellow); }
+.miss { margin-left: auto; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+.mlabel { font-size: 13px; color: var(--ink); margin-top: 3px; font-weight: 600; }
+.mex { font-size: 12px; margin-top: 6px; line-height: 1.5; }
+.mex .wr { color: var(--ink-3); }
+.mex .rt { color: var(--aqua); }
+.mem { margin-top: 10px; }
+.memtop { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .5px; }
+.mbar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; margin-top: 4px; }
+.mbar i { display: block; height: 100%; border-radius: 3px; transition: width .6s linear; }
+.memtxt { font-size: 11.5px; color: var(--ink-2); margin-top: 4px; }
+.mmeta { font-size: 11px; color: var(--ink-3); margin-top: 6px; font-variant-numeric: tabular-nums; }
+.mact { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.abtn { font-size: 11px; border: 1px solid var(--hairline); background: transparent;
+  color: var(--ink-2); border-radius: 8px; padding: 3px 10px; cursor: pointer; font-family: inherit; }
+.abtn:hover { border-color: rgba(255,255,255,.3); color: var(--ink); }
+.abtn:disabled { opacity: .4; cursor: default; }
+.abtn.hunt { border-color: rgba(57,135,229,.5); }
+
+/* ---------- trophy shelf ---------- */
+.tcard { border: 1px solid rgba(201,133,0,.5); border-radius: 10px; padding: 12px 14px; }
+.tcard .beat { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; }
+.tcard .rex { font-size: 12px; color: var(--aqua); margin-top: 6px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Fluent <span>Me</span></div>
+  <a class="item" href="/">Practice</a>
+  <a class="item active" href="/progress">Progress</a>
+  <a class="item" href="/me">Me</a>
+  <a class="item" href="/demo">Demo</a>
+  <div class="right" id="rightbar">…</div>
+</nav>
+<div class="wrap">
+  <div class="pagehead">
+    <div>
+      <h1>Progress</h1>
+      <p class="sub">Honest numbers from real conversation — no quiz scores, no grade inflation.</p>
+    </div>
+    <span class="demotag">may include seeded demo data</span>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="panel">
+    <h3>Score &amp; XP per session</h3>
+    <div class="chartbox" id="chartbox"><div class="emptymsg">loading…</div></div>
+  </div>
+
+  <div class="band2">
+    <div class="panel">
+      <h3>Skills</h3>
+      <div id="skillrows"></div>
+      <div class="footnote">Grammar &amp; vocabulary graded by Claude. Fluency from pace, pauses and fillers.
+        Pronunciation is an ASR-confidence proxy — honest label, not phoneme magic.</div>
+    </div>
+    <div class="panel">
+      <h3>Showed up</h3>
+      <div class="calwrap" id="calbox"></div>
+      <div class="callegend">less
+        <i style="background:var(--grid)"></i><i style="background:rgba(25,158,112,.30)"></i><i
+        style="background:rgba(25,158,112,.60)"></i><i style="background:#199e70"></i> more</div>
+      <div class="hint2">Kai remembers when you show up — and notices when you don't.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Sessions</h3>
+    <div id="sesbox"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Mistake cards</h3>
+    <div class="chiprow" id="chiprow"></div>
+    <div class="wall" id="wall"></div>
+    <div class="footnote">Review is scheduled where estimated retention hits ~90% — FSRS-inspired defaults, not a fitted model.</div>
+  </div>
+
+  <div class="panel">
+    <h3>Trophy shelf 🎓</h3>
+    <div class="trophies" id="trophies"></div>
+    <div class="hint2">Beaten for good — high stability and three clean uses in a row. This mistake is history.</div>
+  </div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+"use strict";
+const MO = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function fmtSesDate(dstr, withTime){        // "2026-07-16 18:50" -> "Jul 16 18:50" | "Jul 16"
+  if (!dstr) return "";
+  const parts = String(dstr).split(" ");
+  const d = parts[0].split("-").map(Number);
+  const base = MO[(d[1] || 1) - 1] + " " + (d[2] || 1);
+  return withTime && parts[1] ? base + " " + parts[1] : base;
+}
+
+/* ---------- shared tooltip ---------- */
+function showTip(html, cx, cy){
+  const tip = document.getElementById("tip");
+  tip.innerHTML = html;
+  tip.style.display = "block";
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = cx + 14; if (x + w > window.innerWidth - 8) x = cx - w - 14;
+  let y = cy - h - 12; if (y < 4) y = cy + 18;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip(){ document.getElementById("tip").style.display = "none"; }
+
+/* ---------- tiles ---------- */
+const BANDS = ["A1","A2","B1","B2","C1","C2"];
+const FLOORS = [0, 30, 45, 60, 75, 88, 100];
+function cefrX(score){                       // piecewise-linear map score -> % across 6 equal segments
+  let i = 0;
+  while (i < 5 && score >= FLOORS[i + 1]) i++;
+  const lo = FLOORS[i], hi = FLOORS[i + 1];
+  const f = Math.min(1, Math.max(0, (score - lo) / (hi - lo)));
+  return (i + f) / 6 * 100;
+}
+
+function renderTiles(p){
+  const lv = p.lv || {lv: 1, next_at: 0, pct: 0};
+  const cp = p.level_progress || {band: "A1", next: "A2", score: 0, pct: 0};
+  const cur = Math.max(0, BANDS.indexOf(cp.band));
+  const segs = BANDS.map((b, i) =>
+    '<div class="seg ' + (i < cur ? "done" : i === cur ? "cur" : "") + '"></div>').join("");
+  const labs = BANDS.map((b, i) =>
+    '<span class="' + (i === cur ? "cur" : "") + '">' + b + "</span>").join("");
+  const mx = cefrX(cp.score).toFixed(2);
+  document.getElementById("tiles").innerHTML = `
+  <div class="tile"><div class="label">XP total</div><div class="value">${p.xp_total}</div>
+    <div class="note">xp = score × ambition — hard sentences beat safe ones</div></div>
+  <div class="tile"><div class="label">Level</div><div class="value">Lv ${lv.lv}</div>
+    <div class="minibar"><i style="width:${lv.pct}%"></i></div>
+    <div class="note">next at ${lv.next_at} xp</div></div>
+  <div class="tile"><div class="label">Streak</div><div class="value">🔥 ${p.streak}<span class="unit">d</span></div>
+    <div class="note">days in a row</div></div>
+  <div class="tile"><div class="label">Turns</div><div class="value">${p.turns_total}</div>
+    <div class="note">spoken turns, all sessions</div></div>
+  <div class="tile"><div class="label">Mistake cards</div>
+    <div class="value" id="cardtv">${p.cards.learning}<span class="unit">learning</span></div>
+    <div class="note" id="cardtn">${p.cards.due} due now</div></div>
+  <div class="tile wide"><div class="label">CEFR estimate${p.plateau ? '<span class="plateau">plateau → Kai is pushing you</span>' : ""}</div>
+    <div class="cefrstrip">${segs}<span class="cefrmark" style="left:${mx}%">▼</span></div>
+    <div class="cefrlabels">${labs}</div>
+    <div class="cefrline">${cp.pct}% of the way to ${cp.next} · score ${cp.score}/100</div>
+    <div class="cefrnote">Estimate from conversation scoring — CEFR-style, not a certified test.</div>
+  </div>`;
+}
+
+/* ---------- score & xp charts ---------- */
+function renderCharts(sessions){
+  const box = document.getElementById("chartbox");
+  const n = sessions.length;
+  if (!n){
+    box.innerHTML = '<div class="emptymsg">No sessions yet. One conversation and this chart is born.</div>';
+    return;
+  }
+  const W = 720, H = 200, L = 34, R = 14, T = 14, B = 12;
+  const plotW = W - L - R, plotH = H - T - B;
+  const xs = i => n === 1 ? L + plotW / 2 : L + i * plotW / (n - 1);
+  const ys = v => T + (100 - v) / 100 * plotH;
+
+  let m = "";
+  [25, 50, 75, 100].forEach(v => {
+    m += `<line x1="${L}" y1="${ys(v).toFixed(1)}" x2="${W - R}" y2="${ys(v).toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>`;
+    m += `<text x="${L - 6}" y="${(ys(v) + 3).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--ink-3)">${v}</text>`;
+  });
+  m += `<line x1="${L}" y1="${ys(0)}" x2="${W - R}" y2="${ys(0)}" stroke="var(--grid)" stroke-width="1"/>`;
+
+  const P = sessions.map((s, i) => xs(i).toFixed(1) + " " + ys(s.avg || 0).toFixed(1));
+  if (n > 1){
+    m += `<path d="M${xs(0).toFixed(1)} ${ys(0)} L${P.join(" L")} L${xs(n - 1).toFixed(1)} ${ys(0)} Z" fill="rgba(57,135,229,.10)"/>`;
+    m += `<path d="M${P.join(" L")}" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  sessions.forEach((s, i) => {
+    m += `<circle cx="${xs(i).toFixed(1)}" cy="${ys(s.avg || 0).toFixed(1)}" r="3" fill="var(--blue)" stroke="var(--surface)" stroke-width="1.5"/>`;
+  });
+  let maxIdx = 0;
+  sessions.forEach((s, i) => { if ((s.avg || 0) > (sessions[maxIdx].avg || 0)) maxIdx = i; });
+  new Set([0, maxIdx, n - 1]).forEach(i => {
+    const anchor = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
+    m += `<text x="${xs(i).toFixed(1)}" y="${(ys(sessions[i].avg || 0) - 8).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--ink-2)">${sessions[i].avg}</text>`;
+  });
+  m += `<line id="ch1" x1="0" y1="6" x2="0" y2="${H - 4}" stroke="rgba(255,255,255,.28)" stroke-width="1" style="display:none"/>`;
+  m += `<rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>`;
+  const mainSvg = `<svg id="svgmain" viewBox="0 0 ${W} ${H}" role="img" aria-label="composite score per session, 0 to 100">${m}</svg>`;
+
+  const H2 = 56, base = 50, topPad = 16;
+  const maxXp = Math.max(1, ...sessions.map(s => s.xp_gained || 0));
+  const barW = Math.max(3, Math.min(22, plotW / n * 0.6));
+  let x2 = `<line x1="${L}" y1="${base}" x2="${W - R}" y2="${base}" stroke="var(--grid)" stroke-width="1"/>`;
+  sessions.forEach((s, i) => {
+    const xp = s.xp_gained || 0;
+    let bh = xp / maxXp * (base - topPad);
+    if (xp > 0 && bh < 2) bh = 2;
+    x2 += `<rect x="${(xs(i) - barW / 2).toFixed(1)}" y="${(base - bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="var(--aqua)"/>`;
+  });
+  x2 += `<text x="${W - R}" y="11" text-anchor="end" font-size="10" fill="var(--ink-3)">max ${maxXp} xp</text>`;
+  x2 += `<line id="ch2" x1="0" y1="4" x2="0" y2="${base}" stroke="rgba(255,255,255,.28)" stroke-width="1" style="display:none"/>`;
+  x2 += `<rect x="0" y="0" width="${W}" height="${H2}" fill="transparent"/>`;
+  const xpSvg = `<svg id="svgxp" class="xpsvg" viewBox="0 0 ${W} ${H2}" role="img" aria-label="xp gained per session">${x2}</svg>`;
+
+  box.innerHTML = mainSvg + xpSvg +
+    (n === 1 ? '<div class="hint2">one session so far — the line starts at two</div>' : "");
+
+  const svg1 = box.querySelector("#svgmain");
+  const ch1 = box.querySelector("#ch1"), ch2 = box.querySelector("#ch2");
+  box.addEventListener("mousemove", e => {
+    const r = svg1.getBoundingClientRect();
+    if (!r.width) return;
+    const xvb = (e.clientX - r.left) * (W / r.width);
+    let bi = 0, bd = Infinity;
+    for (let i = 0; i < n; i++){
+      const d = Math.abs(xs(i) - xvb);
+      if (d < bd){ bd = d; bi = i; }
+    }
+    const X = xs(bi).toFixed(1);
+    ch1.setAttribute("x1", X); ch1.setAttribute("x2", X); ch1.style.display = "block";
+    ch2.setAttribute("x1", X); ch2.setAttribute("x2", X); ch2.style.display = "block";
+    const s = sessions[bi];
+    let t = `<b>${fmtSesDate(s.date)}</b> · avg ${s.avg} · +${s.xp_gained} xp`;
+    if (s.cards_created) t += ` · +${s.cards_created} new`;
+    if (s.cards_advanced) t += ` · ↑${s.cards_advanced} cards`;
+    showTip(t, e.clientX, e.clientY);
+  });
+  box.addEventListener("mouseleave", () => {
+    ch1.style.display = "none"; ch2.style.display = "none"; hideTip();
+  });
+}
+
+/* ---------- skills small-multiples ---------- */
+function spark(vals, col, fill){
+  const w = 150, h = 36, l = 2, r = 8, t = 5, b = 4;
+  const lo = Math.max(0, Math.min.apply(null, vals) - 4);
+  const hi = Math.min(100, Math.max.apply(null, vals) + 4);
+  const span = (hi - lo) || 1;
+  const X = i => vals.length === 1 ? l + (w - l - r) / 2 : l + i * (w - l - r) / (vals.length - 1);
+  const Y = v => t + (hi - v) / span * (h - t - b);
+  const P = vals.map((v, i) => X(i).toFixed(1) + " " + Y(v).toFixed(1));
+  let out = `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true">`;
+  if (vals.length > 1){
+    out += `<path d="M${X(0).toFixed(1)} ${h - 1} L${P.join(" L")} L${X(vals.length - 1).toFixed(1)} ${h - 1} Z" fill="${fill}"/>`;
+    out += `<path d="M${P.join(" L")}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  out += `<circle cx="${X(vals.length - 1).toFixed(1)}" cy="${Y(vals[vals.length - 1]).toFixed(1)}" r="2.5" fill="${col}"/>`;
+  return out + "</svg>";
+}
+
+const DIMS = [
+  ["grammar", "Grammar", "var(--blue)", "rgba(57,135,229,.10)"],
+  ["vocab", "Vocabulary", "var(--violet)", "rgba(144,133,233,.10)"],
+  ["fluency", "Fluency", "var(--aqua)", "rgba(25,158,112,.10)"],
+  ["pron", 'Pronunciation <span class="proxy">(ASR proxy)</span>', "var(--yellow)", "rgba(201,133,0,.10)"],
+];
+
+function renderSkills(p){
+  const el = document.getElementById("skillrows");
+  const recent = (p.sessions || []).slice(-20);
+  el.innerHTML = DIMS.map(dim => {
+    const k = dim[0], label = dim[1], col = dim[2], fill = dim[3];
+    const vals = recent.map(s => (s.skills && typeof s.skills[k] === "number") ? s.skills[k] : null)
+                       .filter(v => v !== null);
+    const cur = (p.skills_now && typeof p.skills_now[k] === "number")
+      ? p.skills_now[k] : (vals.length ? vals[vals.length - 1] : null);
+    if (cur === null) return "";
+    let sp = '<span class="proxy">no data yet</span>', delta = "";
+    if (vals.length){
+      sp = spark(vals, col, fill);
+      const d = cur - vals[0];
+      const gl = d > 0.05 ? "▲" : d < -0.05 ? "▼" : "—";
+      delta = gl + " " + Math.abs(d).toFixed(1);
+    }
+    return `<div class="skrow"><div class="sklabel">${label}</div><div>${sp}</div>` +
+      `<b class="skval">${cur.toFixed(1)}</b><span class="skdelta">${delta}</span></div>`;
+  }).join("");
+}
+
+/* ---------- showed-up calendar ---------- */
+function renderCalendar(days){
+  const el = document.getElementById("calbox");
+  const step = 15, LG = 24, TG = 16, weeks = 16;   // cell 12 + gap 3
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dow = (today.getDay() + 6) % 7;            // Mon = 0
+  const curMon = new Date(today); curMon.setDate(today.getDate() - dow);
+  const start = new Date(curMon); start.setDate(curMon.getDate() - 7 * (weeks - 1));
+  const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+                   "-" + String(d.getDate()).padStart(2, "0");
+  const wsvg = LG + weeks * step - 3 + 2, hsvg = TG + 7 * step - 3 + 2;
+  let out = `<svg id="calsvg" viewBox="0 0 ${wsvg} ${hsvg}" width="${wsvg}" height="${hsvg}" role="img" aria-label="practice calendar, last 16 weeks">`;
+  let prevM = -1, lastLabCol = -9;
+  for (let c = 0; c < weeks; c++){
+    const mon = new Date(start); mon.setDate(start.getDate() + c * 7);
+    if (mon.getMonth() !== prevM){
+      if (c - lastLabCol >= 3){       // skip a label that would collide with the previous one
+        out += `<text x="${LG + c * step}" y="10" font-size="10" fill="var(--ink-3)">${MO[mon.getMonth()]}</text>`;
+        lastLabCol = c;
+      }
+      prevM = mon.getMonth();
+    }
+  }
+  [["M", 0], ["W", 2], ["F", 4]].forEach(rl => {
+    out += `<text x="2" y="${TG + rl[1] * step + 9}" font-size="9" fill="var(--ink-3)">${rl[0]}</text>`;
+  });
+  for (let c = 0; c < weeks; c++){
+    for (let r = 0; r < 7; r++){
+      const d = new Date(start); d.setDate(start.getDate() + c * 7 + r);
+      if (d > today) continue;
+      const rec = days[iso(d)];
+      const xp = rec ? (rec.xp || 0) : 0;
+      let f = "var(--grid)";
+      if (xp >= 80) f = "#199e70";
+      else if (xp >= 30) f = "rgba(25,158,112,.60)";
+      else if (xp >= 1) f = "rgba(25,158,112,.30)";
+      const isToday = d.getTime() === today.getTime();
+      const lab = ("<b>" + MO[d.getMonth()] + " " + d.getDate() + "</b>" +
+        (rec ? " · " + rec.xp + " xp · " + rec.turns + " turns" : " · no practice")).replace(/"/g, "&quot;");
+      out += `<rect x="${LG + c * step}" y="${TG + r * step}" width="12" height="12" rx="2" fill="${f}"` +
+        (isToday ? ' stroke="var(--blue)" stroke-width="1"' : "") + ` data-lab="${lab}"/>`;
+    }
+  }
+  el.innerHTML = out + "</svg>";
+  const svg = el.querySelector("#calsvg");
+  svg.addEventListener("mousemove", e => {
+    const t = e.target.closest ? e.target.closest("rect[data-lab]") : null;
+    if (t) showTip(t.getAttribute("data-lab"), e.clientX, e.clientY); else hideTip();
+  });
+  svg.addEventListener("mouseleave", hideTip);
+}
+
+/* ---------- sessions list ---------- */
+const SB = [
+  ["grammar", "Grammar", "var(--blue)"], ["vocab", "Vocabulary", "var(--violet)"],
+  ["fluency", "Fluency", "var(--aqua)"], ["pron", "Pron (ASR proxy)", "var(--yellow)"],
+];
+
+function renderSessions(sessions){
+  const el = document.getElementById("sesbox");
+  if (!sessions.length){
+    el.innerHTML = '<div class="emptymsg">No sessions yet — hold the button on Practice and talk to Kai.</div>';
+    return;
+  }
+  let out = "";
+  for (let i = sessions.length - 1; i >= 0; i--){
+    const s = sessions[i];
+    const prev = i > 0 ? sessions[i - 1].avg : null;
+    const ar = (prev == null || s.avg === prev) ? "" : (s.avg > prev ? " ▲" : " ▼");
+    const bits = ['<span class="sdate">' + fmtSesDate(s.date, true) + "</span>"];
+    if (s.mode && s.mode !== "free") bits.push('<span class="mchip">' + esc(s.mode) + "</span>");
+    bits.push(s.turns + " turns");
+    bits.push("avg <b>" + s.avg + "</b>" + ar);
+    bits.push("+" + s.xp_gained + " xp");
+    if (s.cards_created) bits.push("+" + s.cards_created + " cards");
+    if (s.cards_advanced) bits.push("↑" + s.cards_advanced);
+    out += `<div class="srow" data-i="${i}">${bits.join(" · ")}</div>`;
+
+    let det = "";
+    if (s.summary) det += "<div>" + esc(s.summary) + "</div>";
+    if (s.best_moment) det += '<div class="best">🏆 “' + esc(s.best_moment) + "”</div>";
+    const np = (s.new_patterns || []).map(p => '<span class="pchip new">' + esc(p) + "</span>").join("");
+    const ap = (s.advanced_patterns || []).map(p => '<span class="pchip adv">' + esc(p) + "</span>").join("");
+    if (np || ap) det += '<div class="pchips">' + np + ap + "</div>";
+    if (s.skills){
+      det += '<div style="margin-top:8px">' + SB.map(d => {
+        const v = s.skills[d[0]];
+        if (typeof v !== "number") return "";
+        return `<div class="sb"><span>${d[1]}</span><div class="sbar"><i style="width:${v}%;background:${d[2]}"></i></div><b>${v.toFixed(1)}</b></div>`;
+      }).join("") + "</div>";
+    }
+    if (!det) det = '<div class="emptymsg">no details recorded for this session</div>';
+    out += `<div class="sdet" id="sdet${i}" hidden>${det}</div>`;
+  }
+  el.innerHTML = out;
+  el.addEventListener("click", e => {
+    const row = e.target.closest(".srow");
+    if (!row) return;
+    const d = document.getElementById("sdet" + row.dataset.i);
+    if (d) d.hidden = !d.hidden;
+  });
+}
+
+/* ---------- mistake-card wall ---------- */
+let cards = [], factor = 9, clockOff = 0, wallFilter = "learning", wallSort = "weak";
+const nowSec = () => Date.now() / 1000 + clockOff;
+
+function calcR(c){
+  const t = Math.max(0, (nowSec() - c.last_seen) / 86400);           // days since last seen
+  return 1 / (1 + t / (factor * Math.max(0.01, c.S)));               // R = 1/(1 + t/(factor*S))
+}
+function rState(R){
+  if (R >= 0.6) return ["strong", "var(--aqua)"];
+  if (R >= 0.3) return ["fading", "var(--yellow)"];
+  return ["almost gone — Kai will hunt it", "var(--critical)"];
+}
+function dueTxt(c){
+  const d = c.due_at - nowSec();
+  if (d <= 0) return "due now";
+  if (d < 3600) return "due in " + Math.max(1, Math.round(d / 60)) + "m";
+  if (d < 48 * 3600) return "due in " + Math.round(d / 3600) + "h";
+  return "due in " + Math.round(d / 86400) + "d";
+}
+function fmtS(S){ return (+S).toFixed(2).replace(/\.?0+$/, ""); }
+
+function wallCounts(){
+  const now = nowSec();
+  return {
+    all: cards.length,
+    due: cards.filter(c => c.status === "learning" && c.due_at <= now).length,
+    learning: cards.filter(c => c.status === "learning").length,
+    graduated: cards.filter(c => c.status === "graduated").length,
+    archived: cards.filter(c => c.status === "archived").length,
+  };
+}
+
+function cardTile(c){
+  const R = calcR(c), pct = Math.round(R * 100);
+  const st = rState(R);
+  const ex = (c.examples && c.examples.length) ? c.examples[c.examples.length - 1] : null;
+  const btns = c.status === "archived"
+    ? '<button class="abtn" data-act="unarchive">unarchive</button>'
+    : '<button class="abtn hunt" data-act="prioritize">hunt next</button>' +
+      '<button class="abtn" data-act="reset">reset</button>' +
+      '<button class="abtn" data-act="archive">archive</button>';
+  return `<div class="mcard${c.status === "archived" ? " archived" : ""}" data-p="${esc(c.pattern)}">
+    <div class="mhead"><span class="pat">${esc(c.pattern)}</span>${c.pinned ? '<span title="pinned">📌</span>' : ""}<span class="miss">${c.hits} misses</span></div>
+    <div class="mlabel">${esc(c.label || "")}</div>
+    ${ex ? `<div class="mex"><span class="wr">“${esc(ex.wrong)}”</span> → <span class="rt">${esc(ex.right)}</span></div>` : ""}
+    <div class="mem">
+      <div class="memtop"><span>memory strength</span><span>estimated</span></div>
+      <div class="mbar"><i style="width:${pct}%;background:${st[1]}"></i></div>
+      <div class="memtxt">memory ~${pct}% · ${st[0]}</div>
+    </div>
+    <div class="mmeta">S=${fmtS(c.S)}d · ${dueTxt(c)}</div>
+    <div class="mact">${btns}</div>
+  </div>`;
+}
+
+function renderWall(){
+  const cnt = wallCounts();
+  document.getElementById("chiprow").innerHTML =
+    [["all", "All"], ["due", "Due now"], ["learning", "Learning"], ["graduated", "Graduated"], ["archived", "Archived"]]
+      .map(f => `<button class="fchip${wallFilter === f[0] ? " active" : ""}" data-f="${f[0]}">${f[1]} ${cnt[f[0]]}</button>`).join("") +
+    `<select id="csort" aria-label="sort cards">
+      <option value="weak"${wallSort === "weak" ? " selected" : ""}>weakest memory</option>
+      <option value="misses"${wallSort === "misses" ? " selected" : ""}>most misses</option>
+      <option value="recent"${wallSort === "recent" ? " selected" : ""}>recently seen</option>
+    </select>`;
+  const wallEl = document.getElementById("wall");
+  if (!cards.length){
+    wallEl.innerHTML = '<div class="emptymsg">No mistake cards yet — which means Kai hasn’t caught you yet. Go say something ambitious.</div>';
+    return;
+  }
+  const now = nowSec();
+  const list = cards.filter(c => {
+    switch (wallFilter){
+      case "due": return c.status === "learning" && c.due_at <= now;
+      case "learning": return c.status === "learning";
+      case "graduated": return c.status === "graduated";
+      case "archived": return c.status === "archived";
+      default: return true;
+    }
+  });
+  if (wallSort === "weak") list.sort((a, b) => calcR(a) - calcR(b));
+  else if (wallSort === "misses") list.sort((a, b) => b.hits - a.hits);
+  else list.sort((a, b) => b.last_seen - a.last_seen);
+  wallEl.innerHTML = list.length ? list.map(cardTile).join("")
+    : '<div class="emptymsg">nothing in this view</div>';
+}
+
+function renderTrophy(){
+  const el = document.getElementById("trophies");
+  const g = cards.filter(c => c.status === "graduated");
+  if (!g.length){
+    el.innerHTML = '<div class="emptymsg">Nothing here yet. Graduation = 21-day stability + three clean uses. It’ll feel great.</div>';
+    return;
+  }
+  el.innerHTML = g.map(c => {
+    const ex = (c.examples && c.examples.length) ? c.examples[c.examples.length - 1] : null;
+    return `<div class="tcard"><div class="mhead"><span class="pat">${esc(c.pattern)}</span></div>
+      <div class="mlabel">${esc(c.label || "")}</div>
+      <div class="beat">beaten in ${c.hits} encounters</div>
+      ${ex ? `<div class="rex">“${esc(ex.right)}”</div>` : ""}</div>`;
+  }).join("");
+}
+
+function updateCardTile(){
+  const cnt = wallCounts();
+  const v = document.getElementById("cardtv"), n = document.getElementById("cardtn");
+  if (v) v.innerHTML = cnt.learning + '<span class="unit">learning</span>';
+  if (n) n.textContent = cnt.due + " due now";
+}
+
+function initWall(cd){
+  cards = cd.cards || [];
+  factor = cd.factor || 9;
+  clockOff = (cd.now || Date.now() / 1000) - Date.now() / 1000;
+  renderWall();
+  renderTrophy();
+
+  const chiprow = document.getElementById("chiprow");
+  chiprow.addEventListener("click", e => {
+    const b = e.target.closest("button[data-f]");
+    if (!b) return;
+    wallFilter = b.dataset.f;
+    renderWall();
+  });
+  chiprow.addEventListener("change", e => {
+    if (e.target && e.target.id === "csort"){ wallSort = e.target.value; renderWall(); }
+  });
+
+  document.getElementById("wall").addEventListener("click", async e => {
+    const b = e.target.closest("button[data-act]");
+    if (!b) return;
+    const tileEl = e.target.closest(".mcard");
+    if (!tileEl) return;
+    const pattern = tileEl.dataset.p, action = b.dataset.act;
+    b.disabled = true;
+    try {
+      const r = await fetch("/api/card/action", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({pattern: pattern, action: action}),
+      });
+      const j = await r.json();
+      if (!r.ok || j.error){ b.disabled = false; return; }
+      const i = cards.findIndex(c => c.pattern === j.pattern);
+      if (i >= 0) cards[i] = j;
+      renderWall(); renderTrophy(); updateCardTile();
+    } catch (err){ b.disabled = false; }
+  });
+
+  // live retrievability decay — re-render bars in place every 10s
+  setInterval(() => {
+    document.querySelectorAll(".mcard").forEach(el => {
+      const c = cards.find(x => x.pattern === el.dataset.p);
+      if (!c) return;
+      const R = calcR(c), pct = Math.round(R * 100), st = rState(R);
+      const bar = el.querySelector(".mbar i");
+      if (bar){ bar.style.width = pct + "%"; bar.style.background = st[1]; }
+      const tx = el.querySelector(".memtxt");
+      if (tx) tx.textContent = "memory ~" + pct + "% · " + st[0];
+      const mm = el.querySelector(".mmeta");
+      if (mm) mm.textContent = "S=" + fmtS(c.S) + "d · " + dueTxt(c);
+    });
+  }, 10000);
+}
+
+/* ---------- boot ---------- */
+(async function init(){
+  let prog, cd;
+  try {
+    const rs = await Promise.all([fetch("/api/progress"), fetch("/api/cards")]);
+    prog = await rs[0].json();
+    cd = await rs[1].json();
+  } catch (e){
+    document.getElementById("tiles").innerHTML =
+      '<div class="tile"><div class="label">error</div><div class="note">could not load /api/progress — is the server running?</div></div>';
+    document.getElementById("chartbox").innerHTML = "";
+    return;
+  }
+  document.getElementById("rightbar").textContent =
+    "🔥 " + prog.streak + "d · " + prog.xp_total + " xp · " + prog.level;
+  renderTiles(prog);
+  renderCharts(prog.sessions || []);
+  renderSkills(prog);
+  renderCalendar(prog.days || {});
+  renderSessions(prog.sessions || []);
+  initWall(cd);
+})();
+</script>
+</body>
+</html>

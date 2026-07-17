@@ -9,23 +9,76 @@
 <style>
 .cols { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; margin-top: 8px; }
 @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
-
 .panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; background: var(--surface); }
 .panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 12px; }
 
+/* ---------- onboarding ---------- */
+.ob { max-width: 640px; margin: 40px auto; }
+.ob h2 { font-size: 22px; margin-bottom: 6px; }
+.ob .sub { margin-bottom: 22px; }
+.ob label { display:block; font-size: 12.5px; color: var(--ink-3); margin: 16px 0 6px; text-transform: uppercase; letter-spacing: .6px; }
+.ob input[type=text] { width: 100%; background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
+  color: var(--ink); font-size: 15px; padding: 10px 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--hairline); border-radius: 20px; padding: 6px 14px; font-size: 13.5px;
+  color: var(--ink-2); cursor: pointer; user-select: none; background: transparent; }
+.chip.on { border-color: var(--blue); color: var(--ink); background: rgba(57,135,229,.12); }
+.script-card { border: 1px solid rgba(57,135,229,.35); background: rgba(57,135,229,.06); border-radius: 12px;
+  padding: 16px 18px; font-size: 15.5px; line-height: 1.7; margin: 14px 0; }
+.payoff-label { font-size: 12px; letter-spacing: 2px; color: var(--aqua); text-transform: uppercase; font-weight: 700; margin: 18px 0 8px; }
+.ghost { color: var(--ink-3); font-size: 12.5px; }
+.ghostlink { color: var(--ink-3); font-size: 12.5px; text-decoration: underline; cursor: pointer; background:none; border:none; }
+.pulse { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+
+/* ---------- mode tabs + setup ---------- */
+.modes { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+.mtab { border: 1px solid var(--hairline); background: transparent; color: var(--ink-2); border-radius: 10px;
+  padding: 8px 16px; font-size: 13.5px; cursor: pointer; }
+.mtab.on { border-color: var(--blue); color: var(--ink); background: rgba(57,135,229,.12); font-weight: 650; }
+.mtab:disabled { opacity: .4; cursor: not-allowed; }
+.mtab .n { font-size: 11px; color: var(--yellow); margin-left: 5px; }
+.goalchip { display: inline-flex; gap: 8px; align-items: center; border: 1px solid rgba(201,133,0,.5); border-radius: 10px;
+  padding: 7px 12px; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; cursor: pointer; }
+.sugg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+@media (max-width: 700px){ .sugg { grid-template-columns: 1fr; } }
+.sc { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 16px; cursor: pointer; background: var(--surface); }
+.sc:hover { border-color: rgba(57,135,229,.5); }
+.sc.wild { border-color: rgba(144,133,233,.5); }
+.sc .t { font-weight: 650; font-size: 14.5px; margin-bottom: 4px; }
+.sc .hook { font-size: 12px; color: var(--violet); font-style: italic; margin-bottom: 6px; }
+.sc .d { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+.sc .pats { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+.sc .pat { font-size: 10.5px; border: 1px solid rgba(201,133,0,.5); border-radius: 8px; padding: 2px 7px; color: var(--yellow); font-family: ui-monospace, monospace; }
+textarea { width: 100%; min-height: 90px; background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
+  color: var(--ink); font-size: 13.5px; padding: 10px 12px; font-family: inherit; resize: vertical; }
+.qrow { font-size: 13px; color: var(--ink-2); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.qrow .k { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; margin-right: 8px; }
+
+/* ---------- session ---------- */
 .ptt-wrap { text-align: center; margin: 18px 0 6px; }
 .ptt { width: 112px; height: 112px; border-radius: 50%; border: 2px solid var(--blue);
   background: rgba(57,135,229,0.10); color: var(--ink); font-size: 14px; font-weight: 650;
-  cursor: pointer; user-select: none; transition: transform .12s, box-shadow .2s;
+  cursor: pointer; user-select: none; transition: transform .12s, border-color .3s;
   -webkit-tap-highlight-color: transparent; touch-action: none; }
 .ptt:disabled { opacity: .35; cursor: not-allowed; }
-.ptt.rec { border-color: var(--critical); background: rgba(208,59,59,0.16);
-  transform: scale(1.06); box-shadow: 0 0 36px rgba(208,59,59,0.4); }
+.ptt.rec { border-color: var(--critical); background: rgba(208,59,59,0.16); transform: scale(1.06); }
+.ptt.echo { border-color: var(--aqua); background: rgba(25,158,112,0.12); }
+.ptt.echo.rec { border-color: var(--aqua); background: rgba(25,158,112,0.22); }
 .ptt-hint { color: var(--ink-3); font-size: 12.5px; margin-top: 8px; min-height: 17px; }
-
 .startbtn { display: inline-block; border: 1px solid var(--blue); color: var(--ink); background: rgba(57,135,229,0.14);
   border-radius: 10px; padding: 10px 22px; font-size: 14.5px; font-weight: 650; cursor: pointer; }
 .startbtn.end { border-color: var(--hairline); background: transparent; color: var(--ink-2); }
+.startbtn:disabled { opacity: .5; }
+.echobox { border: 1px solid rgba(25,158,112,.5); background: rgba(25,158,112,.07); border-radius: 12px;
+  padding: 12px 16px; margin: 10px 0; font-size: 15px; line-height: 1.6; }
+.echobox .lab { font-size: 11px; color: var(--aqua); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.echores { font-size: 13px; margin-top: 8px; color: var(--ink-2); }
+.beatstrip { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
+.beat { font-size: 11.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 4px 10px; color: var(--ink-3); }
+.beat.cur { border-color: var(--blue); color: var(--ink); box-shadow: 0 0 10px rgba(57,135,229,.25); }
+.beat.done { border-color: rgba(12,163,12,.5); color: var(--good); }
+.drill { font-size: 12px; color: var(--yellow); margin: 8px 0; }
 
 .chat { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
 .bub { max-width: 88%; padding: 11px 14px; border-radius: 12px; font-size: 14px; line-height: 1.55;
@@ -34,15 +87,41 @@
 .bub.tutor { align-self: flex-start; }
 .bub .who { font-size: 10.5px; text-transform: uppercase; letter-spacing: .7px; color: var(--ink-3); margin-bottom: 3px; }
 .bub audio { height: 30px; margin-top: 6px; width: 100%; }
-.err { border-bottom: 1px dashed var(--critical); }
+.dots::after { content: "· · ·"; animation: dots 1.2s steps(3) infinite; color: var(--ink-3); }
+@keyframes dots { 33% { content: "•· ·"; } 66% { content: "·•·"; } }
 .fix { margin-top: 8px; border-top: 1px dashed var(--grid); padding-top: 8px; }
 .fix .lab { font-size: 10.5px; color: var(--aqua); text-transform: uppercase; letter-spacing: .6px; margin-right: 6px; }
-.errchips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
-.errchip { font-size: 11.5px; border: 1px solid rgba(208,59,59,.45); color: var(--ink-2);
-  border-radius: 12px; padding: 3px 10px; }
+/* ---------- 声学/文本节奏可视化 ---------- */
+.rstrip { position: relative; height: 34px; margin-top: 10px; background: rgba(255,255,255,.03);
+  border: 1px solid var(--grid); border-radius: 8px; overflow: hidden; }
+.rw { position: absolute; top: 5px; bottom: 5px; border-radius: 4px; background: rgba(57,135,229,.28);
+  border: 1px solid rgba(57,135,229,.45); font-size: 9.5px; color: var(--ink-2); overflow: hidden;
+  display: flex; align-items: center; justify-content: center; white-space: nowrap; cursor: default; }
+.rw.fz { background: rgba(208,59,59,.22); border-color: rgba(208,59,59,.55); color: var(--ink); }
+.rw.fill { background: rgba(144,133,233,.18); border-style: dashed; border-color: rgba(144,133,233,.6); color: var(--violet); }
+.rp { position: absolute; top: 5px; bottom: 5px; border-radius: 4px;
+  background: repeating-linear-gradient(45deg, rgba(201,133,0,.18), rgba(201,133,0,.18) 4px, transparent 4px, transparent 8px);
+  border: 1px dashed rgba(201,133,0,.55); font-size: 9px; color: var(--yellow);
+  display: flex; align-items: center; justify-content: center; }
+.rlegend { display: flex; gap: 12px; align-items: center; font-size: 10.5px; color: var(--ink-3); margin-top: 5px; flex-wrap: wrap; }
+.rlegend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.pace { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.pace .lab { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; width: 38px; }
+.pacebar { position: relative; flex: 1; height: 8px; border-radius: 4px; background: var(--grid); }
+.pacebar .band { position: absolute; top: 0; bottom: 0; background: rgba(25,158,112,.25); border-radius: 4px; }
+.pacebar .needle { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--ink); border-radius: 1px; }
+.pace .val { font-size: 11px; color: var(--ink-2); width: 88px; text-align: right; font-variant-numeric: tabular-nums; }
+#wavec { display: none; width: 100%; max-width: 420px; height: 40px; margin: 8px auto 0; }
+#wavec.on { display: block; }
+.echostrips .cap { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-top: 8px; }
+
+.errchips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.errchip { font-size: 11.5px; border: 1px solid rgba(208,59,59,.45); color: var(--ink-2); border-radius: 12px; padding: 3px 10px; }
 .errchip b { color: var(--ink); font-weight: 600; }
 .badge { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+.unclear { font-size: 11px; color: var(--yellow); margin-top: 5px; }
 
+/* ---------- right column ---------- */
 .dim { margin-bottom: 10px; }
 .dim .row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
 .dim .row b { color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -51,53 +130,141 @@
 .dim.g .bar i { background: var(--blue); } .dim.v .bar i { background: var(--violet); }
 .dim.f .bar i { background: var(--aqua); } .dim.p .bar i { background: var(--yellow); }
 .proxy { font-size: 10px; color: var(--ink-3); }
-.bigscore { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+.bigscore { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
 .bigscore .n { font-size: 38px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .bigscore .xp { color: var(--aqua); font-size: 13px; font-weight: 650; }
 .bigscore .cx { color: var(--ink-3); font-size: 12px; }
-
+.foldbtn { background: none; border: none; color: var(--ink-3); font-size: 11.5px; cursor: pointer; padding: 0; margin-bottom: 8px; }
 .hunt { display: flex; flex-direction: column; gap: 7px; }
 .huntchip { font-size: 12px; border: 1px solid rgba(201,133,0,.5); border-radius: 10px; padding: 6px 10px; color: var(--ink-2); }
 .huntchip.hit { border-color: var(--good); color: var(--ink); background: rgba(12,163,12,.08); }
 .huntchip .k { font-family: ui-monospace, monospace; font-size: 11px; color: var(--yellow); }
 .huntchip.hit .k { color: var(--good); }
+.rbar { height: 4px; border-radius: 2px; background: var(--grid); margin-top: 5px; overflow: hidden; }
+.rbar i { display: block; height: 100%; transition: width .6s linear; }
 .huntnote { font-size: 11.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.5; }
-
 .stat { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); padding: 3px 0; }
 .stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
 .lvl { font-size: 20px; font-weight: 750; color: var(--violet); }
-
 .svc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .svc span { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 10px; padding: 2px 9px; color: var(--ink-3); }
 .svc span.on { color: var(--aqua); border-color: rgba(25,158,112,.5); }
-
+.star { display: inline-flex; gap: 4px; margin: 4px 0; }
+.star span { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--hairline); display: inline-flex;
+  align-items: center; justify-content: center; font-size: 11px; color: var(--ink-3); }
+.star span.ok { border-color: rgba(12,163,12,.6); color: var(--good); }
+.star span.miss { border-color: rgba(208,59,59,.6); color: var(--critical); }
+.tbar { height: 8px; border-radius: 4px; background: var(--grid); overflow: hidden; margin: 6px 0; }
+.tbar i { display: block; height: 100%; }
 .report { border: 1px solid rgba(144,133,233,.5); border-radius: 14px; padding: 16px 18px; margin-top: 14px;
   background: rgba(144,133,233,.06); font-size: 14px; line-height: 1.6; }
 .report b { color: var(--violet); }
+.report table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+.report th { text-align: left; color: var(--ink-3); font-size: 10.5px; text-transform: uppercase; padding: 4px 6px; border-bottom: 1px solid var(--hairline); }
+.report td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--ink-2); }
 </style>
 </head>
 <body>
 <nav>
   <div class="brand">Fluent <span>Me</span></div>
   <a class="item active" href="/">Practice</a>
-  <a class="item" href="/profile">Memory</a>
+  <a class="item" href="/progress">Progress</a>
+  <a class="item" href="/me">Me</a>
+  <a class="item" href="/demo">Demo</a>
   <div class="right" id="rightbar">a tutor that remembers you · in your own voice</div>
 </nav>
 <div class="wrap">
+
+<!-- ==================== ONBOARDING ==================== -->
+<div id="ob" style="display:none">
+  <div class="ob" id="ob1" style="display:none">
+    <h2>First, the ten-second version of you.</h2>
+    <p class="sub">Kai remembers everything you tell him — starting now.</p>
+    <label>What should Kai call you?</label>
+    <input type="text" id="ob-name" placeholder="your name" maxlength="40">
+    <label>Your first language</label>
+    <div class="chips" id="ob-lang"></div>
+    <label>What's English for, right now? (pick up to 2)</label>
+    <div class="chips" id="ob-goal"></div>
+    <div style="margin-top:26px"><button class="startbtn" id="ob1-next">Next — lend me your voice →</button></div>
+  </div>
+
+  <div class="ob" id="ob2" style="display:none">
+    <h2>Lend me your voice for a minute.</h2>
+    <p class="sub">Read this out loud — play with it, be dramatic. The better the performance, the better your fluent
+    twin. <span class="ghost">(Audio stays on this machine unless you enable cloud voice.)</span></p>
+    <div class="script-card">Okay, weird experiment: I'm reading this so a computer can learn my voice.
+    Three thick birds chirped through the thunder — that's the hard part. Now the fun part: WOW, this actually
+    works? Ask me anything. Last year I visited a very unusual zoo, measured a huge orange treasure, and joyfully
+    refused to leave. Red lorry, yellow lorry. Would you believe the fluent version of me is about to say hello?
+    Alright, future me — your turn.</div>
+    <div style="text-align:center">
+      <button class="ptt" id="ob-rec">TAP TO<br>RECORD</button>
+      <div class="ptt-hint" id="ob-rec-hint">tap · read the card · tap again when done (45–90s is perfect)</div>
+    </div>
+    <div style="margin-top:16px; text-align:center" id="ob2-status"></div>
+  </div>
+
+  <div class="ob" id="ob3" style="display:none">
+    <div class="payoff-label">This is you, fluent.</div>
+    <div id="ob3-body"><span class="pulse">building your fluent twin…</span></div>
+    <p class="sub" style="margin-top:14px">Same voice. Same person. Just further along. Everything Kai corrects
+    will be spoken back like this — by the you that already made it.</p>
+    <p class="ghost">Sounds a little unfamiliar? Everyone's recorded voice does — you hear yourself through bone,
+    the world hears this. You'll get used to it fast, and it's worth it.</p>
+    <div style="margin-top:22px">
+      <button class="startbtn" id="ob3-go">▶ Start my first session</button>
+      <button class="ghostlink" id="ob3-tutor" style="margin-left:14px">Rather hear corrections in Kai's voice instead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MAIN ==================== -->
+<div id="main" style="display:none">
   <h1>Talk. It listens, remembers, and answers back — <span style="color:var(--blue)">in your voice, fluent.</span></h1>
-  <p class="sub">Hold the button and chat with Kai. Every mistake becomes a memory card; Kai secretly steers future
-  conversation to make you face it again — spaced repetition, hidden inside small talk. Corrections are spoken in
+  <p class="sub">Every mistake becomes a memory card. Kai steers future conversation so you face it again right
+  before you'd forget — spaced repetition hidden inside small talk, never a flashcard. Corrections come back in
   <b>your own cloned voice</b>: the fluent you, already existing.</p>
+
+  <div id="goalchip"></div>
+  <div class="modes" id="modes"></div>
 
   <div class="cols">
     <div>
+      <!-- setup panels -->
+      <div class="panel" id="setup-scenario" style="display:none">
+        <h3>Scenes from your life <button class="ghostlink" id="sc-regen" style="float:right">↻ new ideas</button></h3>
+        <div class="ghost" id="sugg-note">Kai builds these from what he remembers about you.</div>
+        <div class="sugg" id="sugg"></div>
+      </div>
+      <div class="panel" id="setup-interview" style="display:none">
+        <h3>Mock interview setup</h3>
+        <textarea id="jd" placeholder="paste the job description…"></textarea>
+        <div class="ghost" style="margin:10px 0 6px">— or build it from what Kai knows about you —</div>
+        <div class="chips" id="iv-facts"></div>
+        <input type="text" id="iv-role" placeholder="role hint (optional), e.g. solutions engineer" style="width:100%;background:var(--page);border:1px solid var(--hairline);border-radius:8px;color:var(--ink);font-size:13px;padding:8px 12px;margin-top:10px">
+        <div style="margin-top:12px"><button class="startbtn" id="iv-gen">Generate mock →</button> <span class="ghost" id="iv-status"></span></div>
+        <div id="iv-plan"></div>
+      </div>
+      <div class="panel" id="setup-present" style="display:none">
+        <h3>Presentation rehearsal setup</h3>
+        <textarea id="pr-outline" placeholder="paste your outline / bullets…"></textarea>
+        <div style="margin-top:10px">target <input type="text" id="pr-min" value="3" style="width:46px;background:var(--page);border:1px solid var(--hairline);border-radius:6px;color:var(--ink);padding:5px 8px;text-align:center"> minutes
+        <button class="startbtn" id="pr-gen" style="margin-left:12px">Split into sections →</button> <span class="ghost" id="pr-status"></span></div>
+        <div id="pr-plan"></div>
+      </div>
+
+      <!-- session -->
       <div class="panel">
         <button class="startbtn" id="startbtn">▶ Start session</button>
         <span class="ptt-hint" id="topstat" style="margin-left:12px"></span>
+        <div id="scenebar"></div>
         <div class="ptt-wrap">
           <button class="ptt" id="ptt" disabled>HOLD<br>TO TALK</button>
+          <canvas id="wavec" width="840" height="80"></canvas>
           <div class="ptt-hint" id="hint">start a session first</div>
         </div>
+        <div id="echobox"></div>
         <div class="chat" id="chat"></div>
         <div id="reportbox"></div>
       </div>
@@ -106,24 +273,34 @@
     <div style="display:flex;flex-direction:column;gap:18px">
       <div class="panel">
         <h3>This turn</h3>
-        <div class="bigscore"><span class="n" id="comp">—</span>
-          <span class="xp" id="xp"></span><span class="cx" id="cx"></span></div>
-        <div class="dim g"><div class="row"><span>Grammar</span><b id="sg">—</b></div><div class="bar"><i id="bg"></i></div></div>
-        <div class="dim v"><div class="row"><span>Vocabulary</span><b id="sv">—</b></div><div class="bar"><i id="bv"></i></div></div>
-        <div class="dim f"><div class="row"><span>Fluency</span><b id="sf">—</b></div><div class="bar"><i id="bf"></i></div></div>
-        <div class="dim p"><div class="row"><span>Pronunciation <span class="proxy">(ASR proxy)</span></span><b id="sp">—</b></div><div class="bar"><i id="bp"></i></div></div>
+        <div id="gracebox" style="display:none;color:var(--ink-2);font-size:14px">warming up — just talk 🙂</div>
+        <div id="scorebox">
+          <div class="bigscore"><span class="n" id="comp">—</span>
+            <span class="xp" id="xp"></span><span class="cx" id="cx"></span></div>
+          <button class="foldbtn" id="fold">▸ details</button>
+          <div id="dims" style="display:none">
+            <div class="dim g"><div class="row"><span>Grammar</span><b id="sg">—</b></div><div class="bar"><i id="bg"></i></div></div>
+            <div class="dim v"><div class="row"><span>Vocabulary</span><b id="sv">—</b></div><div class="bar"><i id="bv"></i></div></div>
+            <div class="dim f"><div class="row"><span>Fluency</span><b id="sf">—</b></div><div class="bar"><i id="bf"></i></div></div>
+            <div class="dim p"><div class="row"><span>Pronunciation <span class="proxy">(ASR proxy)</span></span><b id="sp">—</b></div><div class="bar"><i id="bp"></i></div></div>
+          </div>
+        </div>
       </div>
+
+      <div class="panel" id="scenepanel" style="display:none"><h3 id="scenepanel-h">Scene</h3><div id="scenepanel-b"></div></div>
 
       <div class="panel">
         <h3>🎯 Kai is secretly hunting</h3>
         <div class="hunt" id="hunt"><div class="huntnote">no due cards yet — make some mistakes first 😉</div></div>
-        <div class="huntnote">These are your overdue mistake-cards. Kai engineers questions whose natural answer
-        needs the pattern — answer correctly and the card levels up (10min → 1d → 3d → 7d → 21d).</div>
+        <div class="huntnote">Your overdue mistake-cards, weakest memory first. Kai engineers questions whose natural
+        answer needs the pattern — use it right and the card levels up. Strength bars are estimates
+        (FSRS-inspired defaults, not a fitted model).</div>
       </div>
 
       <div class="panel">
         <h3>You</h3>
-        <div class="stat"><span>Level (estimate)</span><span class="lvl" id="lvl">—</span></div>
+        <div class="stat"><span>Level <span class="proxy">(estimate)</span></span><span class="lvl" id="lvl">—</span></div>
+        <div class="stat"><span>Lv (xp)</span><b id="lvxp">—</b></div>
         <div class="stat"><span>XP</span><b id="xptotal">0</b></div>
         <div class="stat"><span>Active cards</span><b id="ncards">0</b></div>
         <div class="stat"><span>Turns total</span><b id="nturns">0</b></div>
@@ -132,133 +309,679 @@
     </div>
   </div>
 </div>
+</div>
+
 <script>
 const $ = id => document.getElementById(id);
-let sessionOn = false, hunting = [];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let ST = null;                       // /api/state cache
+let sessionOn = false, mode = "free", scene = null, ivPlan = null, prPlan = null, SUGG = [];
+let echoOffer = null, echoArmed = false, lastTurnErrors = [], gentleLog = [];
 
-function fmtPat(p){ return p.replace(/-/g, " "); }
+/* ================= audio queue + barge-in ================= */
+const audioQ = []; let nowPlaying = null;
+function enqueueAudio(el, then){ el._then = then; audioQ.push(el); pump(); }
+function pump(){
+  if (nowPlaying || !audioQ.length) return;
+  nowPlaying = audioQ.shift();
+  const fin = () => { const t = nowPlaying && nowPlaying._then; nowPlaying = null; if (t) t(); pump(); };
+  nowPlaying.onended = nowPlaying.onerror = fin;
+  nowPlaying.play().catch(fin);      // autoplay 拒绝 → 保留手动 controls
+}
+function stopAllAudio(){ audioQ.length = 0; if (nowPlaying){ nowPlaying.pause(); nowPlaying = null; } }
+
+/* ================= NDJSON stream reader ================= */
+async function streamTurn(url, fd, onStage){
+  const ctl = new AbortController();
+  const watchdog = setTimeout(() => ctl.abort(), 90000);
+  try {
+    const resp = await fetch(url, {method: "POST", body: fd, signal: ctl.signal});
+    if (!resp.ok){
+      let e = {}; try { e = await resp.json(); } catch {}
+      onStage({stage: "error", at: "pre", error: e.error || ("http " + resp.status), recoverable: false});
+      return;
+    }
+    const reader = resp.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;){
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0){
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+        if (!line) continue;
+        try { onStage(JSON.parse(line)); } catch (e) { console.warn("bad line", line); }
+      }
+    }
+    buf += dec.decode();
+    if (buf.trim()) try { onStage(JSON.parse(buf)); } catch {}
+  } catch (e) {
+    onStage({stage: "error", at: "net", error: "connection lost — try again", recoverable: false});
+  } finally { clearTimeout(watchdog); }
+}
+
+/* ================= state / boot ================= */
+const LANGS = ["中文","Español","日本語","한국어","Français","other"];
+const GOALS = [["interview","Job interviews"],["presentation","Presentations"],["daily","Daily conversation"],["travel","Travel"],["meetings","Meetings at work"]];
 
 async function refreshState(){
-  const s = await (await fetch("/api/state")).json();
-  $("lvl").textContent = s.level;
-  $("xptotal").textContent = s.profile.xp;
-  $("ncards").textContent = s.cards_total;
-  $("nturns").textContent = s.profile.turns_total;
+  ST = await (await fetch("/api/state")).json();
+  $("lvl").textContent = ST.level;
+  $("lvxp").textContent = "Lv " + ST.lv.lv + " · " + ST.profile.xp + "/" + ST.lv.next_at;
+  $("xptotal").textContent = ST.profile.xp;
+  $("ncards").textContent = ST.cards_total;
+  $("nturns").textContent = ST.profile.turns_total;
+  $("rightbar").textContent = `🔥 ${ST.profile.streak}d · ${ST.profile.xp} xp · ${ST.level}`;
   const badges = [
-    ["mic voice sample", s.enrolled_local],
-    ["whisper", s.services.stt], ["local tts", s.services.tts_local],
-    ["elevenlabs", s.eleven_key ? (s.eleven_cloned ? true : "key only") : false],
-    ["sauna memory", s.sauna_key],
+    ["voice sample", ST.enrolled_local],
+    ["clone", ST.eleven_cloned ? true : (ST.eleven_key ? "key only" : false)],
+    ["judge · " + ST.judge, ST.judge !== "cli"],
+    ["sauna mcp", ST.services.sauna_mcp],
   ];
+  if (ST.mock) badges.push(["MOCK MODE", "warn"]);
   $("svc").innerHTML = badges.map(([n, v]) =>
-    `<span class="${v === true ? "on" : ""}">${n}${v === "key only" ? " · clone pending" : v ? "" : " · off"}</span>`).join("");
+    `<span class="${v === true ? "on" : ""}">${n}${v === "key only" ? " · pending" : v === false ? " · off" : ""}</span>`).join("");
+  const gs = ST.goal_suggestion;
+  $("goalchip").innerHTML = gs ? `<span class="goalchip" onclick="pickMode('${gs.mode === 'scenario' ? 'scenario' : gs.mode}')">🎯 ${esc(gs.text)}</span>` : "";
+  renderModes();
+  return ST;
 }
-refreshState();
 
-function renderHunt(list, hits = {}){
-  hunting = list || [];
-  if (!hunting.length){ $("hunt").innerHTML = '<div class="huntnote">no due cards — clean slate ✨</div>'; return; }
-  $("hunt").innerHTML = hunting.map(p => {
-    const hit = hits[p] === true;
-    return `<div class="huntchip ${hit ? "hit" : ""}"><span class="k">${p}</span> — ${hit ? "✓ used correctly, card leveled up!" : "waiting for a natural opening…"}</div>`;
+function renderModes(){
+  const due = ST.due_summary || {n: 0};
+  const tabs = [["free","Free talk"],["review","Quick review", due.n ? due.n : null],
+                ["scenario","Scenario"],["interview","Interview"],["presentation","Presentation"]];
+  $("modes").innerHTML = tabs.map(([k, label, n]) =>
+    `<button class="mtab ${mode === k ? "on" : ""}" ${sessionOn ? "disabled" : ""} onclick="pickMode('${k}')">${label}${n ? `<span class="n">${n} due</span>` : ""}</button>`).join("");
+}
+
+window.pickMode = function(k){
+  if (sessionOn) return;
+  mode = k;
+  renderModes();
+  $("setup-scenario").style.display = k === "scenario" ? "" : "none";
+  $("setup-interview").style.display = k === "interview" ? "" : "none";
+  $("setup-present").style.display = k === "presentation" ? "" : "none";
+  $("startbtn").style.display = (k === "scenario" || k === "interview" || k === "presentation") ? "none" : "";
+  if (k === "scenario") loadSuggestions(false);
+  if (k === "interview") loadFactChips();
+  if (k === "review" && !(ST.due_summary || {}).n){ $("hint").textContent = "no cards due — free talk instead?"; }
+};
+
+/* ================= onboarding ================= */
+function boot(){
+  if (!ST.onboarded){ showOb(1); return; }
+  if (!ST.enrolled_local){ showOb(2); return; }
+  $("ob").style.display = "none"; $("main").style.display = "";
+}
+function showOb(step){
+  $("ob").style.display = ""; $("main").style.display = "none";
+  ["ob1","ob2","ob3"].forEach((x, i) => $(x).style.display = (i + 1 === step) ? "" : "none");
+  if (step === 1){
+    $("ob-lang").innerHTML = LANGS.map(l => `<span class="chip" data-v="${l}">${l}</span>`).join("");
+    $("ob-goal").innerHTML = GOALS.map(([k, l]) => `<span class="chip" data-v="${k}">${l}</span>`).join("");
+    [...$("ob-lang").children].forEach(c => c.onclick = () => { [...$("ob-lang").children].forEach(x => x.classList.remove("on")); c.classList.add("on"); });
+    [...$("ob-goal").children].forEach(c => c.onclick = () => {
+      if (c.classList.contains("on")) c.classList.remove("on");
+      else if ($("ob-goal").querySelectorAll(".on").length < 2) c.classList.add("on");
+    });
+  }
+}
+$("ob1-next").onclick = async () => {
+  const name = $("ob-name").value.trim() || "friend";
+  const lang = ($("ob-lang").querySelector(".on") || {}).dataset?.v || "";
+  const goals = [...$("ob-goal").querySelectorAll(".on")].map(c => c.dataset.v);
+  await fetch("/api/setup", {method: "POST", headers: {"Content-Type": "application/json"},
+                             body: JSON.stringify({name, native_lang: lang, goals})});
+  await refreshState();
+  showOb(ST.enrolled_local ? 3 : 2);
+  if (ST.enrolled_local) runPayoff();
+};
+
+let obMr = null, obChunks = [], obT0 = 0, obTimer = null;
+$("ob-rec").onclick = async () => {
+  if (obMr && obMr.state === "recording"){ obMr.stop(); return; }
+  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  obChunks = []; obMr = new MediaRecorder(stream);
+  obMr.ondataavailable = e => obChunks.push(e.data);
+  obT0 = Date.now();
+  obTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - obT0) / 1000);
+    $("ob-rec-hint").textContent = `recording ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} — tap again when done`;
+    if (s >= 90) obMr.stop();
+  }, 500);
+  obMr.onstop = async () => {
+    clearInterval(obTimer);
+    stream.getTracks().forEach(t => t.stop());
+    $("ob-rec").classList.remove("rec");
+    const dur = (Date.now() - obT0) / 1000;
+    $("ob2-status").innerHTML = '<span class="pulse">listening back…</span>';
+    const fd = new FormData();
+    fd.append("file", new Blob(obChunks, {type: obMr.mimeType}), "enroll.webm");
+    const r = await fetch("/api/enroll", {method: "POST", body: fd});
+    const j = await r.json();
+    if (!r.ok){ $("ob2-status").textContent = j.error || "couldn't hear you — one more take?"; return; }
+    if (dur < 40){
+      $("ob2-status").innerHTML = `That was ${Math.round(dur)}s — a bit short for a good twin. One more take?
+        <button class="ghostlink" id="ob2-keep">Use it anyway</button>`;
+      $("ob2-keep").onclick = () => { showOb(3); runPayoff(); };
+      return;
+    }
+    showOb(3); runPayoff();
+  };
+  obMr.start();
+  $("ob-rec").classList.add("rec");
+};
+
+async function runPayoff(){
+  await refreshState();
+  if (ST.eleven_key && !ST.eleven_cloned){
+    const r = await fetch("/api/enroll/eleven", {method: "POST"});
+    if (!r.ok){
+      const j = await r.json().catch(() => ({}));
+      if (j.reason === "tier")
+        $("ob3-body").innerHTML = `<span class="ghost">ElevenLabs free tier can't clone voices — upgrade to Starter
+          or grab a hackathon key. Meanwhile, here's the local fallback:</span>`;
+    }
+  }
+  try {
+    const r = await fetch("/api/voice/payoff", {method: "POST"});
+    const j = await r.json();
+    const a = document.createElement("audio"); a.controls = true; a.src = j.audio;
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `<div style="font-size:17px;line-height:1.6;margin-bottom:8px">“${j.text}”</div>`;
+    wrap.appendChild(a);
+    wrap.insertAdjacentHTML("beforeend", `<div class="badge">${j.cloned ? "your cloned voice" : "fallback voice — clone offline"} · ${j.engine}</div>`);
+    $("ob3-body").innerHTML = ""; $("ob3-body").appendChild(wrap);
+    enqueueAudio(a);
+  } catch { $("ob3-body").innerHTML = '<span class="ghost">voice engine offline — you can test it later on the Me page.</span>'; }
+}
+$("ob3-go").onclick = () => { $("ob").style.display = "none"; $("main").style.display = ""; };
+$("ob3-tutor").onclick = async () => {
+  await fetch("/api/me/prefs", {method: "POST", headers: {"Content-Type": "application/json"},
+                                body: JSON.stringify({fix_voice: "tutor"})});
+  $("ob").style.display = "none"; $("main").style.display = "";
+};
+
+/* ================= scenario setup ================= */
+async function loadSuggestions(regen){
+  $("sugg").innerHTML = '<div class="ghost pulse">Kai is sketching scenes from your life…</div>';
+  try {
+    const r = await fetch("/api/scenes/suggest" + (regen ? "?regen=1" : ""));
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error);
+    SUGG = j.suggestions || [];
+    $("sugg").innerHTML = SUGG.map((s, i) => `
+      <div class="sc ${s.wildcard ? "wild" : ""}" onclick="startScene(${i})">
+        <div class="t">${s.wildcard ? "🎲 " : ""}${esc(s.title)}</div>
+        <div class="hook">${esc(s.hook || "")}</div>
+        <div class="d">Kai plays: ${esc(s.kai_role)}. You: ${esc(s.learner_role)}.<br>Goal: ${esc(s.objective)}</div>
+        <div class="pats">${(s.target_patterns || []).map(p => `<span class="pat">${esc(p)}</span>`).join("")}</div>
+      </div>`).join("");
+  } catch (e) { $("sugg").innerHTML = `<div class="ghost">couldn't generate scenes (${esc(e.message)}) — try ↻</div>`; }
+}
+$("sc-regen").onclick = () => loadSuggestions(true);
+window.startScene = async idx => {
+  // 直接把客户端渲染的 stub 发过去 — 避免缓存 key 变化导致"点 A 开出 B"
+  const r = await fetch("/api/scene/start", {method: "POST", headers: {"Content-Type": "application/json"},
+                                             body: JSON.stringify(SUGG[idx] ? {scene: SUGG[idx]} : {suggestion_idx: idx})});
+  beginSession(await r.json());
+};
+
+/* ================= interview setup ================= */
+async function loadFactChips(){
+  const m = await (await fetch("/api/me")).json();
+  $("iv-facts").innerHTML = (m.facts || []).filter(f => f.use).map(f =>
+    `<span class="chip" data-v="${esc(f.text)}">${esc(f.text)}</span>`).join("") ||
+    '<span class="ghost">no facts yet — talk to Kai first, or paste a JD above</span>';
+  [...$("iv-facts").children].forEach(c => { if (c.classList.contains("chip")) c.onclick = () => c.classList.toggle("on"); });
+}
+$("iv-gen").onclick = async () => {
+  $("iv-status").textContent = "building your mock…"; $("iv-gen").disabled = true;
+  const facts = [...$("iv-facts").querySelectorAll(".on")].map(c => c.dataset.v);
+  try {
+    const r = await fetch("/api/scene/interview/intake", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({jd_text: $("jd").value, fact_ids: facts, role_hint: $("iv-role").value})});
+    ivPlan = await r.json();
+    if (!r.ok) throw new Error(ivPlan.error);
+    $("iv-plan").innerHTML = `<div style="margin-top:12px;font-weight:650">${esc(ivPlan.role)} @ ${esc(ivPlan.company)} · ${esc(ivPlan.interviewer)}</div>` +
+      ivPlan.questions.map(q => `<div class="qrow"><span class="k">${esc(q.kind)}${q.wants ? " · " + esc(q.wants) : ""}</span>${esc(q.q)}</div>`).join("") +
+      `<div style="margin-top:12px"><button class="startbtn" onclick="startPlan('${ivPlan.id}')">🎙 Start mock interview</button></div>`;
+    $("iv-status").textContent = "";
+  } catch (e) { $("iv-status").textContent = "intake failed: " + e.message; }
+  $("iv-gen").disabled = false;
+};
+window.startPlan = async pid => {
+  const r = await fetch("/api/scene/start", {method: "POST", headers: {"Content-Type": "application/json"},
+                                             body: JSON.stringify({plan_id: pid})});
+  beginSession(await r.json());
+};
+
+/* ================= presentation setup ================= */
+$("pr-gen").onclick = async () => {
+  $("pr-status").textContent = "splitting…"; $("pr-gen").disabled = true;
+  try {
+    const r = await fetch("/api/scene/present/intake", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({outline_text: $("pr-outline").value, target_minutes: parseFloat($("pr-min").value) || 3})});
+    prPlan = await r.json();
+    if (!r.ok) throw new Error(prPlan.error);
+    $("pr-plan").innerHTML = `<div style="margin-top:12px;font-weight:650">${esc(prPlan.title)} · for ${esc(prPlan.audience)}</div>` +
+      prPlan.sections.map(s => `<div class="qrow"><span class="k">${s.target_sec}s</span>${esc(s.title)}</div>`).join("") +
+      `<div style="margin-top:12px"><button class="startbtn" onclick="startPlan('${prPlan.id}')">🎤 Start rehearsal</button></div>`;
+    $("pr-status").textContent = "";
+  } catch (e) { $("pr-status").textContent = "intake failed: " + e.message; }
+  $("pr-gen").disabled = false;
+};
+
+/* ================= session ================= */
+function beginSession(r){
+  sessionOn = true; scene = r.scene || null; echoOffer = null; echoArmed = false;
+  lastTurnErrors = []; gentleLog = [];
+  $("chat").innerHTML = ""; $("reportbox").innerHTML = ""; $("echobox").innerHTML = "";
+  ["setup-scenario","setup-interview","setup-present"].forEach(x => $(x).style.display = "none");
+  $("startbtn").style.display = ""; $("startbtn").className = "startbtn end"; $("startbtn").textContent = "■ End session";
+  $("ptt").disabled = false;
+  $("hint").textContent = "hold — speak English — release";
+  renderModes();
+  if (r.drill_n) $("scenebar").innerHTML = `<div class="drill">⚡ warm-up review · ${r.drill_n} cards fading — quick answers, still just conversation</div>`;
+  else $("scenebar").innerHTML = "";
+  renderScenePanel(null);
+  const b = bubble(`<div class="who">kai${scene ? " · in character" : ""}</div>${esc(r.reply)}`, "tutor");
+  if (r.audio){
+    const a = document.createElement("audio"); a.controls = true; a.src = r.audio;
+    b.appendChild(a); b.insertAdjacentHTML("beforeend", `<div class="badge">${r.engine}</div>`);
+    enqueueAudio(a);
+  }
+  renderHunt((r.briefing.due_cards || []).map(c => ({pattern: c.pattern, R: c.R})), {});
+}
+
+$("startbtn").onclick = async () => {
+  if (sessionOn){ endSession(); return; }
+  $("startbtn").disabled = true; $("startbtn").textContent = "waking Kai…";
+  try {
+    const r = await fetch("/api/session/start", {method: "POST", headers: {"Content-Type": "application/json"},
+                                                 body: JSON.stringify({mode: mode === "review" ? "review" : "free"})});
+    beginSession(await r.json());
+  } finally { $("startbtn").disabled = false; }
+};
+
+async function endSession(){
+  $("startbtn").disabled = true;
+  const r = await (await fetch("/api/session/end", {method: "POST"})).json();
+  sessionOn = false; $("ptt").disabled = true; $("ptt").className = "ptt"; $("ptt").innerHTML = "HOLD<br>TO TALK";
+  $("echobox").innerHTML = ""; $("scenebar").innerHTML = "";
+  $("startbtn").disabled = false; $("startbtn").className = "startbtn"; $("startbtn").textContent = "▶ Start session";
+  $("hint").textContent = "session saved to memory";
+  renderReport(r);
+  renderModes(); refreshState();
+}
+
+function renderReport(r){
+  let html = `<div class="report"><b>Session report</b> — ${r.turns} turns · avg ${r.avg ?? "—"} · +${r.xp_gained} xp
+    · ${r.cards_created} new cards · ${r.cards_advanced} leveled up<br>`;
+  const sr = r.scene_report;
+  if (sr && sr.mode === "interview"){
+    html += `<b>${esc(sr.role)} @ ${esc(sr.company)}</b> · language ${sr.overall?.language ?? "—"} · structure ${sr.overall?.structure ?? "—"}
+      <div class="ghost">coaching feedback, not a hiring assessment</div>
+      <table><tr><th>question</th><th>lang</th><th>structure</th><th>delivery</th><th></th></tr>` +
+      (sr.per_question || []).map(q => `<tr><td>${esc(q.q)}</td><td>${q.lang ?? "—"}</td>
+        <td>${q.structure ?? "—"}${q.star && q.star.s !== null && q.star.s !== undefined ? " · " + ["s","t","a","r"].map(k => q.star[k] ? k.toUpperCase() : "·").join("") : ""}</td>
+        <td>${q.delivery ? (q.delivery.wpm ?? "—") + "wpm · " + (q.delivery.fillers ?? 0) + " fillers" : "—"}</td>
+        <td>${q.polished_audio ? `<audio controls src="${q.polished_audio}" style="height:24px;width:120px"></audio>` : ""}</td></tr>`).join("") + "</table>";
+    if (sr.coach_verdict) html += `<div style="margin-top:8px">${esc(sr.coach_verdict)}</div>`;
+    if (sr.top_fixes?.length) html += `<div style="margin-top:4px">🎯 ${esc(sr.top_fixes.join(" · "))}</div>`;
+  } else if (sr && sr.mode === "presentation"){
+    html += `<b>${esc(sr.title)}</b> · total ${sr.total?.actual_sec}s / ${sr.total?.target_sec}s target
+      <table><tr><th>section</th><th>time</th><th>wpm</th><th>clarity</th><th></th></tr>` +
+      (sr.sections || []).map(s => `<tr><td>${esc(s.title)}</td><td>${s.actual_sec}s/${s.target_sec}s</td>
+        <td>${s.wpm ?? "—"}</td><td>${s.clarity ?? "—"}</td>
+        <td>${s.polished_audio ? `<audio controls src="${s.polished_audio}" style="height:24px;width:120px"></audio>` : ""}</td></tr>`).join("") + "</table>";
+    if (sr.qa?.asked) html += `Q&A: ${sr.qa.asked} questions · avg ${sr.qa.avg}<br>`;
+    if (sr.vs_last_run) html += `vs last run: ${sr.vs_last_run.total_sec > 0 ? "+" : ""}${sr.vs_last_run.total_sec}s · ${sr.vs_last_run.fillers > 0 ? "+" : ""}${sr.vs_last_run.fillers} fillers<br>`;
+    if (sr.coach_verdict) html += `<div style="margin-top:8px">${esc(sr.coach_verdict)}</div>`;
+    if (sr.top_fixes?.length) html += `<div style="margin-top:4px">🎯 ${esc(sr.top_fixes.join(" · "))}</div>`;
+  } else if (sr && sr.mode === "scenario"){
+    html += `scene “${esc(sr.title)}” — beats ${sr.beats} · ${sr.outcome}<br>`;
+  }
+  if (r.best_moment) html += `🏆 best line: “${esc(r.best_moment)}”<br>`;
+  if (ST.profile.gentle_mode && gentleLog.length){
+    const top = {}; gentleLog.forEach(e => top[e.pattern] = (top[e.pattern] || 0) + 1);
+    const t3 = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    html += `<div style="margin-top:6px"><b>What to polish</b> · ${t3.map(([p, n]) => `${p} ×${n}`).join(" · ")}</div>`;
+  }
+  html += r.summary ? `<div class="ghost" style="margin-top:6px">${esc(r.summary)}</div>` : "";
+  html += `</div>`;
+  $("reportbox").innerHTML = html;
+  if (r.sendoff_audio){
+    const a = document.createElement("audio"); a.src = r.sendoff_audio; enqueueAudio(a);
+    $("reportbox").insertAdjacentHTML("beforeend", `<div class="ghost" style="margin-top:6px">🗣 ${esc(r.sendoff || "")}</div>`);
+  }
+}
+
+/* ================= turn rendering ================= */
+function bubble(html, cls){
+  const b = document.createElement("div");
+  b.className = "bub " + cls; b.innerHTML = html;
+  $("chat").prepend(b); return b;
+}
+
+/* ============ 声学/文本节奏可视化 ============ */
+const FILLER_RE = /^(um+|uh+|erm+|hmm+|like)$/i;
+const FUZZY_LP = -0.35;          // Scribe 词级 logprob 低于此 → 说得含糊 (ASR proxy)
+
+function rhythmStrip(words, {legend = true} = {}){
+  // words: [{text,start,end,logprob}] → 时间轴: 词块(按实际时长定宽) + 停顿块 + 填充词/含糊词标色
+  if (!words || words.length < 2) return "";
+  const t0 = words[0].start, t1 = words[words.length - 1].end;
+  const total = Math.max(t1 - t0, 0.5);
+  const px = t => ((t - t0) / total * 100).toFixed(2) + "%";
+  const wd = (a, b) => Math.max((b - a) / total * 100, 0.8).toFixed(2) + "%";
+  let h = "", nFuzzy = 0, nFill = 0, nPause = 0;
+  for (let i = 0; i < words.length; i++){
+    const w = words[i];
+    const fill = FILLER_RE.test(w.text);
+    const fz = !fill && w.logprob != null && w.logprob < FUZZY_LP;
+    if (fill) nFill++; if (fz) nFuzzy++;
+    const tip = `${esc(w.text)} · ${((w.end - w.start) * 1000).toFixed(0)}ms` +
+                (w.logprob != null ? ` · conf ${w.logprob.toFixed(2)} (ASR proxy)` : "");
+    h += `<span class="rw${fz ? " fz" : ""}${fill ? " fill" : ""}" style="left:${px(w.start)};width:${wd(w.start, w.end)}" title="${tip}">${esc(w.text)}</span>`;
+    if (i < words.length - 1){
+      const gap = words[i + 1].start - w.end;
+      if (gap > 0.5){
+        nPause++;
+        h += `<span class="rp" style="left:${px(w.end)};width:${wd(w.end, words[i + 1].start)}" title="pause ${gap.toFixed(1)}s">${gap.toFixed(1)}s</span>`;
+      }
+    }
+  }
+  let out = `<div class="rstrip">${h}</div>`;
+  if (legend){
+    const bits = [`<span>${total.toFixed(1)}s</span>`];
+    if (nPause) bits.push(`<span><i style="background:rgba(201,133,0,.5)"></i>${nPause} pause${nPause > 1 ? "s" : ""}</span>`);
+    if (nFill) bits.push(`<span><i style="background:rgba(144,133,233,.5)"></i>${nFill} filler${nFill > 1 ? "s" : ""}</span>`);
+    if (nFuzzy) bits.push(`<span><i style="background:rgba(208,59,59,.5)"></i>${nFuzzy} fuzzy <span style="opacity:.7">(ASR proxy)</span></span>`);
+    out += `<div class="rlegend">${bits.join("")}</div>`;
+  }
+  return out;
+}
+
+function paceGauge(wps){
+  // 语速仪表: 1.8–3.4 wps 自然带高亮, 指针 = 本轮实测; 轴范围 0.8–4.8
+  if (wps == null) return "";
+  const LO = 0.8, HI = 4.8;
+  const pc = v => Math.max(0, Math.min(100, (v - LO) / (HI - LO) * 100));
+  const label = wps < 1.8 ? "unhurried" : wps <= 3.4 ? "natural band ✓" : "rushed";
+  return `<div class="pace"><span class="lab">pace</span>
+    <div class="pacebar"><span class="band" style="left:${pc(1.8)}%;width:${(pc(3.4) - pc(1.8)).toFixed(1)}%"></span>
+    <span class="needle" style="left:${pc(wps).toFixed(1)}%"></span></div>
+    <span class="val">${wps.toFixed(1)} w/s · ${label}</span></div>`;
+}
+function fmtPat(p){ return (p || "").replace(/-/g, " "); }
+
+function renderHunt(list, hits){
+  if (!list || !list.length){ $("hunt").innerHTML = '<div class="huntnote">no due cards — clean slate ✨</div>'; return; }
+  $("hunt").innerHTML = list.map(c => {
+    const p = c.pattern || c, R = c.R;
+    const hit = hits && hits[p] === true;
+    const col = R == null ? "" : (R >= .6 ? "var(--aqua)" : R >= .3 ? "var(--yellow)" : "var(--critical)");
+    return `<div class="huntchip ${hit ? "hit" : ""}"><span class="k">${p}</span> — ${hit ? "✓ used correctly — card leveled up!" : "waiting for a natural opening…"}
+      ${R != null ? `<div class="rbar"><i style="width:${Math.round(R * 100)}%;background:${col}"></i></div>` : ""}</div>`;
   }).join("");
 }
 
-function scorePanel(sc){
-  if (!sc) return;
+function scorePanel(sc, grace){
+  $("gracebox").style.display = grace ? "" : "none";
+  $("scorebox").style.display = grace ? "none" : "";
+  if (!sc || grace) return;
   const d = sc.dims || {};
-  const put = (k, sid, bid) => {
-    const v = d[k];
-    $(sid).textContent = v == null ? "n/a" : v;
-    $(bid).style.width = (v == null ? 0 : v) + "%";
-  };
-  put("grammar", "sg", "bg"); put("vocab", "sv", "bv");
-  put("fluency", "sf", "bf"); put("pron", "sp", "bp");
+  const put = (k, sid, bid) => { const v = d[k];
+    $(sid).textContent = v == null ? "n/a" : v; $(bid).style.width = (v == null ? 0 : v) + "%"; };
+  put("grammar", "sg", "bg"); put("vocab", "sv", "bv"); put("fluency", "sf", "bf"); put("pron", "sp", "bp");
   $("comp").textContent = sc.composite == null ? "—" : sc.composite;
   $("xp").textContent = sc.xp ? `+${sc.xp} xp` : "";
   $("cx").textContent = sc.complexity ? `ambition ×${sc.complexity}` : "";
 }
-
-function bubble(html, cls){
-  const b = document.createElement("div");
-  b.className = "bub " + cls;
-  b.innerHTML = html;
-  $("chat").prepend(b);
-  return b;
-}
-
-$("startbtn").onclick = async () => {
-  if (sessionOn){   // end
-    $("startbtn").disabled = true;
-    const r = await (await fetch("/api/session/end", {method: "POST"})).json();
-    sessionOn = false; $("ptt").disabled = true;
-    $("startbtn").disabled = false; $("startbtn").className = "startbtn"; $("startbtn").textContent = "▶ Start session";
-    $("hint").textContent = "session saved to memory";
-    $("reportbox").innerHTML = `<div class="report"><b>Session report</b> — ${r.turns} turns · avg ${r.avg ?? "—"} ·
-      +${r.xp_gained} xp · ${r.cards_created} new cards · ${r.cards_advanced} cards leveled up<br>
-      ${r.summary || ""}${r.best_moment ? `<br>🏆 best line: “${r.best_moment}”` : ""}</div>`;
-    refreshState();
-    return;
-  }
-  $("startbtn").disabled = true; $("startbtn").textContent = "waking Kai…";
-  const r = await (await fetch("/api/session/start", {method: "POST"})).json();
-  sessionOn = true;
-  $("chat").innerHTML = ""; $("reportbox").innerHTML = "";
-  $("startbtn").disabled = false; $("startbtn").className = "startbtn end"; $("startbtn").textContent = "■ End session";
-  $("ptt").disabled = false;
-  $("hint").textContent = "hold — speak English — release";
-  bubble(`<div class="who">kai</div>${r.reply}<audio controls autoplay src="${r.audio}"></audio>
-    <div class="badge">${r.engine}</div>`, "tutor");
-  renderHunt((r.briefing.due_cards || []).map(c => c.pattern));
+$("fold").onclick = () => {
+  const open = $("dims").style.display !== "none";
+  $("dims").style.display = open ? "none" : "";
+  $("fold").textContent = open ? "▸ details" : "▾ details";
 };
 
-let mr = null, chunks = [];
+function renderScenePanel(s){
+  if (!scene){ $("scenepanel").style.display = "none"; $("scenebar").querySelector?.(".beatstrip")?.remove(); return; }
+  $("scenepanel").style.display = "";
+  const m = scene.mode || mode;
+  if (m === "scenario" || (m === "presentation" && s && s.phase === "qa")){
+    $("scenepanel-h").textContent = "Scene · " + (scene.title || "");
+    const beats = (s && s.beats) || scene.beats || [];
+    const cur = beats.findIndex(b => !b.done);
+    $("scenepanel-b").innerHTML = `<div class="ghost" style="margin-bottom:8px">${esc(scene.objective || "")}</div>` +
+      `<div class="beatstrip">` + beats.map((b, i) =>
+        `<span class="beat ${b.done ? "done" : i === cur ? "cur" : ""}">${b.done ? "✓ " : ""}${esc(b.goal)}</span>`).join("") + `</div>` +
+      ((s && s.scene_state === "wrapup") ? '<div class="drill">scene wrapping up — end session for the report</div>' : "");
+  } else if (m === "interview"){
+    $("scenepanel-h").textContent = `Interview · Q${(s ? s.cursor : 0) + 1}/${(s && s.n) || (scene.questions || []).length}`;
+    const st = s && s.structure;
+    const star = st && st.s !== null && st.s !== undefined ?
+      `<div class="star">${["s","t","a","r"].map(k => `<span class="${st[k] === true ? "ok" : st[k] === false ? "miss" : ""}">${k.toUpperCase()}</span>`).join("")}</div>` : "";
+    $("scenepanel-b").innerHTML = `${star}${st ? `<div class="ghost">${st.note || ""} · structure ${st.score ?? "—"}</div>` : '<div class="ghost">answer to see STAR + delivery feedback</div>'}
+      <div style="margin-top:8px"><button class="ghostlink" onclick="sceneNext()">skip to next question →</button></div>`;
+  } else if (m === "presentation"){
+    const n = (s && s.n) || (scene.sections || []).length;
+    const cur = s ? s.cursor : 0;
+    $("scenepanel-h").textContent = `Section ${Math.min(cur + 1, n)}/${n}`;
+    let tim = "";
+    if (s && s.timing && s.timing.target_sec){
+      const t = s.timing, ratio = Math.min(t.actual_sec / t.target_sec, 2);
+      const col = ratio <= 1.1 ? "var(--good)" : ratio <= 1.25 ? "var(--yellow)" : "var(--critical)";
+      tim = `<div class="ghost">last section: ${t.actual_sec}s / ${t.target_sec}s target · ${t.wpm ?? "—"} wpm</div>
+        <div class="tbar"><i style="width:${Math.min(ratio * 50, 100)}%;background:${col}"></i></div>`;
+    }
+    $("scenepanel-b").innerHTML = tim +
+      `<div style="margin-top:6px">${(scene.sections || []).map((x, i) =>
+        `<div class="qrow" style="${i === cur ? "color:var(--ink)" : ""}"><span class="k">${x.target_sec}s</span>${esc(x.title)}</div>`).join("")}</div>
+      <div style="margin-top:8px"><button class="ghostlink" onclick="sceneNext()">next section →</button></div>`;
+  }
+}
+window.sceneNext = async () => {
+  const r = await fetch("/api/scene/next", {method: "POST"});
+  const j = await r.json();
+  if (!r.ok) return;
+  const b = bubble(`<div class="who">kai</div>${esc(j.reply)}`, "tutor");
+  if (j.audio){ const a = document.createElement("audio"); a.controls = true; a.src = j.audio; b.appendChild(a); enqueueAudio(a); }
+  renderScenePanel({cursor: j.cursor, phase: j.phase, n: null});
+};
+
+/* ================= the turn ================= */
+let lastWords = [];                 // 最近一轮的词级时间轴 (echo 对比用)
+function handleStages(youBub){
+  let kaiBub = null, fixMeta = null;
+  return j => { switch (j.stage){
+    case "stt":
+      lastWords = j.words || [];
+      youBub.innerHTML = `<div class="who">you · ${esc(j.stt_engine)}</div>${esc(j.heard)}` +
+        rhythmStrip(lastWords);      // 判卷没回来, 节奏条先画 — 声学反馈零等待
+      kaiBub = bubble(`<div class="who">kai</div><span class="dots"></span>`, "tutor");
+      $("hint").textContent = "Kai is thinking…";
+      break;
+    case "judge": {
+      const grace = j.grace;
+      lastTurnErrors = j.errors || [];
+      if (ST.profile.gentle_mode) (j.errors || []).forEach(e => gentleLog.push({pattern: e.pattern}));
+      const showCorr = !grace && !ST.profile.gentle_mode;
+      let extra = "";
+      if (showCorr && j.errors && j.errors.length){
+        const focus = j.errors.find(e => e.pattern === j.focus_pattern) || j.errors[0];
+        const rest = j.errors.length - 1;
+        extra += `<div class="errchips"><span class="errchip">${esc(focus.type)} · “${esc(focus.span)}” → <b>${esc(focus.correction)}</b></span>
+          ${rest > 0 ? `<span class="ghost">+${rest} noted quietly — they'll come back when you're ready</span>` : ""}</div>`;
+      }
+      if (showCorr && j.recast) extra += `<div class="fix"><span class="lab">recast</span>${esc(j.recast)}</div>`;
+      if (showCorr && j.native && j.native !== j.recast) extra += `<div class="fix"><span class="lab">native</span>${esc(j.native)}</div>`;
+      const uw = (j.pr_meta || {}).unclear_words;
+      if (showCorr && uw && uw.length) extra += `<div class="unclear">came out fuzzy (ASR proxy): ${esc(uw.join(", "))}</div>`;
+      if (j.parrot) extra += `<div class="ghost" style="margin-top:4px">echoing me? nice try — say it in your own sentence for credit 😉</div>`;
+      if (j.fl_meta && j.fl_meta.wps != null) extra += paceGauge(j.fl_meta.wps);
+      youBub.insertAdjacentHTML("beforeend", extra);
+      kaiBub.innerHTML = `<div class="who">kai${scene ? " · in character" : ""}</div>${esc(j.reply)}` +
+        (j.degraded ? `<div class="badge">judge offline — conversation continues</div>` : "");
+      scorePanel(j.scores, grace);
+      renderHunt(j.hunting, j.elicited);
+      renderScenePanel(j.scene);
+      $("lvl").textContent = j.level; $("xptotal").textContent = j.xp;
+      if (j.lv) $("lvxp").textContent = "Lv " + j.lv.lv + " · " + j.xp + "/" + j.lv.next_at;
+      echoOffer = j.echo_offer || null;
+      $("ptt").disabled = false;
+      $("hint").textContent = "speaking…";
+      break; }
+    case "tts": {
+      const isFix = j.kind === "fix";
+      const target = isFix ? youBub : kaiBub;
+      if (!target) break;
+      const a = document.createElement("audio"); a.controls = true; a.src = j.audio;
+      target.appendChild(a);
+      target.insertAdjacentHTML("beforeend",
+        `<div class="badge">${isFix ? (j.own_voice ? "☝ your voice, fluent · " : "☝ Kai's voice — your twin is offline · ") : ""}${j.engine}</div>`);
+      enqueueAudio(a, isFix ? () => armEcho() : null);
+      if (isFix) fixMeta = true;
+      break; }
+    case "error":
+      if (!j.recoverable){
+        youBub.remove();
+        if (kaiBub && kaiBub.querySelector(".dots")) kaiBub.remove();   // 别留永久转圈的气泡
+        $("hint").textContent = j.error || "error — try again";
+        $("ptt").disabled = false;
+      } else {
+        (kaiBub || youBub).insertAdjacentHTML("beforeend", `<div class="badge">audio unavailable · ${j.at}</div>`);
+      }
+      break;
+    case "done":
+      if (echoOffer && !fixMeta) armEcho();   // 没有 fix 音频也可以 echo (文字 recast 已显示)
+      if (!echoArmed) $("hint").textContent = "hold — speak English — release";
+      break;
+  }};
+}
+
+/* ================= echo loop ================= */
+function armEcho(){
+  if (!echoOffer || echoArmed || !sessionOn) return;
+  echoArmed = true;
+  $("ptt").classList.add("echo"); $("ptt").innerHTML = "ECHO";
+  $("hint").textContent = "that's you — try it on: hold and say it back";
+  $("echobox").innerHTML = `<div class="echobox"><div class="lab">say it back — one shot</div>
+    “${esc(echoOffer.recast)}” <button class="ghostlink" id="echoskip" style="float:right">maybe later</button>
+    <div class="echores" id="echores"></div></div>`;
+  $("echoskip").onclick = disarmEcho;
+}
+function disarmEcho(){
+  echoArmed = false; echoOffer = null;
+  $("ptt").classList.remove("echo"); $("ptt").innerHTML = "HOLD<br>TO TALK";
+  $("echobox").innerHTML = "";
+  $("hint").textContent = "hold — speak English — release";
+}
+async function postEcho(blob){
+  const offer = echoOffer;
+  $("hint").textContent = "listening to your echo…";
+  const fd = new FormData();
+  fd.append("file", blob, "echo.webm");
+  fd.append("recast", offer.recast);
+  fd.append("pattern", offer.pattern || "");
+  if (offer.orig.fl != null) fd.append("fl", offer.orig.fl);
+  if (offer.orig.pr != null) fd.append("pr", offer.orig.pr);
+  if (offer.orig.fillers != null) fd.append("fillers", offer.orig.fillers);
+  const r = await fetch("/api/echo", {method: "POST", body: fd});
+  const j = await r.json();
+  const el = $("echores");
+  if (!r.ok){ if (el) el.textContent = j.error || "couldn't hear that"; setTimeout(disarmEcho, 2500); return; }
+  if (el){
+    // 节奏对比: 第一次尝试 vs 跟读 — 两条 strip 叠放, 停顿/填充词的消失肉眼可见
+    let strips = "";
+    if (lastWords.length > 1 && (j.words || []).length > 1){
+      strips = `<div class="echostrips"><div class="cap">your first try</div>${rhythmStrip(lastWords, {legend: false})}
+        <div class="cap">your echo</div>${rhythmStrip(j.words, {legend: false})}</div>`;
+    }
+    if (j.passed){
+      const bits = [];
+      if (j.fluency_delta != null) bits.push(`${j.fluency_delta >= 0 ? "smoother" : "rougher"} than your first try`);
+      if (j.fillers_delta != null && j.fillers_delta < 0) bits.push("fewer fillers");
+      el.innerHTML = `✓ Nailed it${bits.length ? " — " + bits.join(", ") : ""}.` +
+        (j.fast_tracked ? ` <span style="color:var(--aqua)">card fast-tracked ⚡ (still needs to come up naturally to level further)</span>` : "") +
+        strips +
+        `<div class="ghost">rough single-sentence signal, not a lab measurement</div>`;
+    } else {
+      el.innerHTML = `So close — the fluent you says it exactly like the card. It'll come around again naturally.` + strips;
+    }
+  }
+  setTimeout(disarmEcho, 8000);   // 有对比条要看, 多留几秒
+}
+
+/* ================= PTT ================= */
+let mr = null, chunks = [], ac = null, meterRAF = null;
 async function startRec(){
   if (!sessionOn || (mr && mr.state === "recording")) return;
+  stopAllAudio();                                    // barge-in
   const stream = await navigator.mediaDevices.getUserMedia({audio: true});
   chunks = [];
   mr = new MediaRecorder(stream);
   mr.ondataavailable = e => chunks.push(e.data);
+  // mic level ring + 实时滚动波形 (录音时的"它在听我"反馈)
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const an = ac.createAnalyser(); an.fftSize = 512;
+    ac.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize);
+    const cv = $("wavec"), ctx2 = cv.getContext("2d");
+    cv.classList.add("on");
+    ctx2.clearRect(0, 0, cv.width, cv.height);
+    const col = echoArmed ? "rgba(25,158,112,.9)" : "rgba(57,135,229,.9)";
+    let x = 0;
+    const loop = () => {
+      an.getByteTimeDomainData(buf);
+      let s = 0; for (let i = 0; i < buf.length; i++){ const v = (buf[i] - 128) / 128; s += v * v; }
+      const rms = Math.sqrt(s / buf.length);
+      $("ptt").style.boxShadow = `0 0 ${12 + rms * 220}px rgba(${echoArmed ? "25,158,112" : "208,59,59"},.45)`;
+      // 滚动波形: 每帧画一根 RMS 竖线, 到头回卷
+      const h = Math.max(2, rms * cv.height * 2.6);
+      ctx2.fillStyle = col;
+      ctx2.fillRect(x, (cv.height - h) / 2, 2, h);
+      x = (x + 2) % cv.width;
+      ctx2.clearRect(x, 0, 14, cv.height);        // 抹掉游标前方一段
+      meterRAF = requestAnimationFrame(loop);
+    };
+    loop();
+  } catch {}
   mr.onstop = async () => {
+    cancelAnimationFrame(meterRAF); $("ptt").style.boxShadow = "";
+    $("wavec").classList.remove("on");
     stream.getTracks().forEach(t => t.stop());
     $("ptt").classList.remove("rec");
     const blob = new Blob(chunks, {type: mr.mimeType});
     if (blob.size < 2000){ $("hint").textContent = "too short — hold while you speak"; return; }
-    $("hint").textContent = "listening → grading → speaking…";
-    const fd = new FormData();
-    fd.append("file", blob, "turn.webm");
-    const r = await fetch("/api/turn", {method: "POST", body: fd});
-    const j = await r.json();
-    if (!r.ok){ $("hint").textContent = j.error || "error"; return; }
-    $("hint").textContent = "hold — speak English — release";
-
-    const errs = (j.errors || []).map(e =>
-      `<span class="errchip">${e.type} · “${e.span}” → <b>${e.correction}</b></span>`).join("");
-    let fixes = "";
-    if (j.recast) fixes += `<div class="fix"><span class="lab">recast</span>${j.recast}</div>`;
-    if (j.native && j.native !== j.recast) fixes += `<div class="fix"><span class="lab">native</span>${j.native}</div>`;
-    if (j.fix_audio) fixes += `<audio controls src="${j.fix_audio}"></audio>
-      <div class="badge">☝ your voice, fluent · ${j.fix_engine}</div>`;
-    bubble(`<div class="who">you · ${j.scores.composite ?? "—"}pts · ${j.stt_engine}</div>${j.heard}
-      ${errs ? `<div class="errchips">${errs}</div>` : ""}${fixes}`, "you");
-    if (j.reply) bubble(`<div class="who">kai</div>${j.reply}
-      <audio controls autoplay src="${j.reply_audio}"></audio><div class="badge">${j.reply_engine} · ${j.ms}ms round-trip</div>`, "tutor");
-
-    scorePanel(j.scores);
-    renderHunt(j.hunting, j.elicited);
-    $("lvl").textContent = j.level;
-    $("xptotal").textContent = j.xp;
+    if (echoArmed){ postEcho(blob); return; }
+    $("hint").textContent = "transcribing…";
+    $("ptt").disabled = true;
+    const youBub = bubble(`<div class="who">you</div><span class="dots"></span>`, "you");
+    const fd = new FormData(); fd.append("file", blob, "turn.webm");
+    await streamTurn("/api/turn", fd, handleStages(youBub));
   };
   mr.start();
   $("ptt").classList.add("rec");
-  $("hint").textContent = "listening… release when done";
+  $("hint").textContent = echoArmed ? "echoing… release when done" : "I'm listening — take your time.";
 }
 function stopRec(){ if (mr && mr.state === "recording") mr.stop(); }
 $("ptt").addEventListener("pointerdown", e => { e.preventDefault(); startRec(); });
 $("ptt").addEventListener("pointerup", stopRec);
 $("ptt").addEventListener("pointerleave", stopRec);
-window.addEventListener("keydown", e => { if (e.code === "Space" && !e.repeat){ e.preventDefault(); startRec(); } });
-window.addEventListener("keyup", e => { if (e.code === "Space"){ e.preventDefault(); stopRec(); } });
+window.addEventListener("keydown", e => {
+  if (e.code === "Space" && !e.repeat && sessionOn && !e.target.matches("input,textarea")){ e.preventDefault(); startRec(); }
+});
+window.addEventListener("keyup", e => {
+  if (e.code === "Space" && sessionOn && !e.target.matches("input,textarea")){ e.preventDefault(); stopRec(); }
+});
+
+/* boot */
+refreshState().then(() => { boot(); pickMode("free"); });
 </script>
 </body>
 </html>

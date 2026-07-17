@@ -20,7 +20,7 @@ _LOCAL_REF = DATA / "voice" / "mirror_user.wav"
 _LEGACY_REF = Path("/home/carwaii/higgs-audio/examples/voice_prompts/mirror_user.wav")
 USER_REF = _LOCAL_REF if _LOCAL_REF.exists() or not _LEGACY_REF.exists() else _LEGACY_REF
 NEUTRAL_SCENE = "The speaker speaks clear, fluent, natural English."
-ELEVEN_TUTOR_DEFAULT = "21m00Tcm4TlvDq8ikWAM"  # Rachel — 现场可换任意预置声
+ELEVEN_TUTOR_DEFAULT = "SAz9YHcvj6GT2YYXdXww"  # River — relaxed/neutral, free tier 可用 (library voices 要付费)
 
 
 def _eleven_key() -> str:
@@ -67,9 +67,10 @@ def _say_eleven(text: str, voice: str, out: Path) -> bool:
     vid = voices.get("user") if voice == "user" else os.environ.get("ELEVEN_TUTOR_VOICE", ELEVEN_TUTOR_DEFAULT)
     if not vid:
         return False
+    model = os.environ.get("ELEVEN_TTS_MODEL", "eleven_flash_v2_5")  # turbo 已弃用; flash ~75ms
     req = urllib.request.Request(
         f"https://api.elevenlabs.io/v1/text-to-speech/{vid}?output_format=mp3_44100_128",
-        data=json.dumps({"text": text, "model_id": "eleven_turbo_v2_5"}).encode(),
+        data=json.dumps({"text": text, "model_id": model}).encode(),
         headers={"xi-api-key": key, "Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
@@ -87,12 +88,26 @@ def _say_local(text: str, voice: str, out: Path):
                     "-o", str(out)], check=True, timeout=300)
 
 
+def _say_mock(out: Path):
+    """无任何 TTS 可用时的开发桩: 0.5s 提示音, UI 音频链路照常可测。"""
+    import math
+    import struct
+    import wave
+    with wave.open(str(out), "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
+        w.writeframes(b"".join(struct.pack("<h", int(9000 * math.sin(2 * math.pi * 440 * t / 16000)))
+                               for t in range(8000)))
+
+
 def say(text: str, voice: str, out: Path) -> str:
     """返回引擎标签, 界面 badge 直接显示。out 后缀由引擎决定, 调用方用返回的真实路径。"""
+    if os.environ.get("FLUENTME_MOCK"):
+        _say_mock(out.with_suffix(".wav"))
+        return "mock"
     mp3 = out.with_suffix(".mp3")
     if _say_eleven(text, voice, mp3):
         out.unlink(missing_ok=True)
-        return "elevenlabs · turbo-v2.5"
+        return "elevenlabs · " + os.environ.get("ELEVEN_TTS_MODEL", "eleven_flash_v2_5").replace("eleven_", "").replace("_", "-")
     _say_local(text, voice, out.with_suffix(".wav"))
     mp3.unlink(missing_ok=True)
     return "higgs-v2 · local"

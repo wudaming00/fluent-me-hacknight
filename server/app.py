@@ -69,7 +69,9 @@ def _to_wav(upload_bytes: bytes, tag: str, max_sec: int = 45) -> Path:
 
 
 def _page(name: str):
-    return FileResponse(str(PAGES / name), media_type="text/html")
+    # no-store: 今晚频繁热更, 浏览器缓存旧 UI 是 demo 隐形杀手
+    return FileResponse(str(PAGES / name), media_type="text/html",
+                        headers={"Cache-Control": "no-store"})
 
 
 @app.get("/")
@@ -502,11 +504,12 @@ async def turn(file: UploadFile = File(...)):
 
         # ---- 双路 TTS 并行, 完成即推 ----
         reply = judge.get("reply", "")
-        # 修正声道: interview/presentation 用 polished (killer moment), 其他用 recast/native
+        # 修正声道: interview/presentation 用 polished (killer moment), 其他用 recast/native;
+        # 句子本来就对 → 用原句合成克隆参考 ("你的句子, 母语节奏") — 每轮都有可打磨的对象
         if SESSION["mode"] in ("interview", "presentation"):
             fix_text = judge.get("polished")
         else:
-            fix_text = recast or judge.get("native")
+            fix_text = recast or judge.get("native") or (heard if n_words >= 4 and not degraded else None)
         fix_voice = store.profile.get("fix_voice", "user")
         jobs = {}
         if reply:

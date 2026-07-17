@@ -7,11 +7,11 @@
 <link rel="stylesheet" href="/static/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
 <style>
-.studio { max-width: 880px; margin: 0 auto; }
+.studio { max-width: 920px; margin: 0 auto; }
 
 /* ---------- PTT ---------- */
-.ptt-wrap { text-align: center; margin: 26px 0 8px; }
-.ptt { width: 128px; height: 128px; border-radius: 50%; border: 2px solid var(--blue);
+.ptt-wrap { text-align: center; margin: 22px 0 6px; }
+.ptt { width: 124px; height: 124px; border-radius: 50%; border: 2px solid var(--blue);
   background: rgba(57,135,229,0.10); color: var(--ink); font-size: 14px; font-weight: 650;
   cursor: pointer; user-select: none; transition: transform .12s, border-color .3s;
   -webkit-tap-highlight-color: transparent; touch-action: none; }
@@ -19,22 +19,33 @@
 .ptt.imitate { border-color: var(--aqua); background: rgba(25,158,112,0.12); }
 .ptt.imitate.rec { border-color: var(--aqua); background: rgba(25,158,112,0.22); }
 .ptt-hint { color: var(--ink-3); font-size: 13px; margin-top: 10px; min-height: 18px; }
+.ptt-hint kbd { border: 1px solid var(--hairline); border-radius: 4px; padding: 0 5px; font-size: 11px;
+  font-family: ui-monospace, monospace; color: var(--ink-2); background: rgba(255,255,255,.04); }
 #wavec { display: none; width: 100%; max-width: 480px; height: 40px; margin: 10px auto 0; }
 #wavec.on { display: block; }
 
-/* ---------- cards ---------- */
+/* ---------- 空状态: 三步 + 灵感句 ---------- */
+.steps { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 26px 0 8px; }
+.step { border: 1px solid var(--hairline); border-radius: 12px; padding: 12px 18px; background: var(--surface);
+  font-size: 13px; color: var(--ink-2); max-width: 220px; text-align: center; line-height: 1.5; }
+.step b { display: block; font-size: 20px; margin-bottom: 4px; }
+.inspire { text-align: center; margin-top: 18px; }
+.inspire .ghost { display: block; margin-bottom: 10px; }
+.ichip { display: inline-block; border: 1px dashed var(--hairline); border-radius: 18px; padding: 6px 14px;
+  font-size: 13px; color: var(--ink-2); margin: 4px; font-style: italic; }
+
+/* ---------- 卡片 ---------- */
 .pcard { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px;
   background: var(--surface); margin-top: 16px; }
 .pcard .lab { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px; }
 .pcard.you .lab { color: var(--blue); }
-.pcard.target { border-color: rgba(25,158,112,.55); background: rgba(25,158,112,.05); }
-.pcard.target .lab { color: var(--aqua); }
-.sent { font-size: 17px; line-height: 1.6; }
+.sent { font-size: 16.5px; line-height: 1.6; }
 .wavebox { overflow-x: auto; margin-top: 10px; }
-.wavebox canvas { display: block; height: 46px; }
+.wavebox canvas { display: block; }
 .play { border: 1px solid var(--hairline); background: rgba(255,255,255,.05); color: var(--ink);
-  border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin: 0 8px 8px 0; }
-.pcard.target .play { border-color: var(--aqua); background: rgba(25,158,112,.14); }
+  border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin: 6px 8px 0 0; }
+.play.aq { border-color: var(--aqua); background: rgba(25,158,112,.14); }
+.play kbd { font-size: 10px; color: var(--ink-3); margin-left: 5px; }
 .badge { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 6px; }
 .note { font-size: 13px; color: var(--yellow); margin-top: 8px; }
 .errchips { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -42,21 +53,61 @@
 .errchip b { color: var(--ink); font-weight: 600; }
 .errchip.habit { border-color: rgba(144,133,233,.55); }
 .ghost { color: var(--ink-3); font-size: 12.5px; }
+.ghostlink { color: var(--ink-3); font-size: 12.5px; text-decoration: underline; cursor: pointer; background: none; border: none; }
 .dots::after { content: "· · ·"; animation: dots 1.2s steps(3) infinite; color: var(--ink-3); }
 @keyframes dots { 33% { content: "•· ·"; } 66% { content: "·•·"; } }
 .pulse { animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .45; } }
+.skel { height: 46px; border-radius: 8px; margin-top: 10px;
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.09) 50%, rgba(255,255,255,.04) 75%);
+  background-size: 200% 100%; animation: shim 1.4s infinite; }
+@keyframes shim { to { background-position: -200% 0; } }
 
-/* ---------- rhythm strip (与波形同 px/s 比例) ---------- */
-.rstrip { position: relative; height: 32px; margin-top: 8px; background: rgba(255,255,255,.03);
+/* ---------- YOUR TRY 折叠态 ---------- */
+.youmini { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.youmini .cap { font-size: 10.5px; color: var(--blue); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; flex: none; }
+.youmini .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.youmini .chev { color: var(--ink-3); flex: none; }
+
+/* ---------- Compare Deck ---------- */
+.deck { border: 1px solid rgba(25,158,112,.5); border-radius: 16px; background: rgba(25,158,112,.04);
+  margin-top: 16px; overflow: hidden; }
+.lane { padding: 14px 18px; }
+.lane.ref { background: rgba(25,158,112,.05); }
+.lane.take { border-top: 1px solid var(--hairline); }
+.lane .lanehead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.lane .lab { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; }
+.lane.ref .lab { color: var(--aqua); }
+.lane.take .lab { color: var(--blue); }
+.lane .sent { font-size: 15.5px; }
+.score { font-size: 30px; font-weight: 750; font-variant-numeric: tabular-nums; line-height: 1; }
+.delta { font-size: 12px; font-weight: 650; }
+.delta.up { color: var(--good); } .delta.dn { color: var(--critical); }
+.dims { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.dimchip { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 2px 8px; color: var(--ink-2); }
+.dimchip.g { border-color: rgba(12,163,12,.55); color: var(--good); }
+.dimchip.y { border-color: rgba(201,133,0,.55); color: var(--yellow); }
+.dimchip.r { border-color: rgba(208,59,59,.55); color: var(--critical); }
+.overlaycap { display: flex; gap: 14px; font-size: 10.5px; color: var(--ink-3); margin-top: 8px; }
+.overlaycap i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.deckfoot { padding: 10px 18px 14px; border-top: 1px solid var(--hairline); }
+.takechips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tchip { border: 1px solid var(--hairline); background: transparent; color: var(--ink-2); border-radius: 10px;
+  padding: 3px 10px; font-size: 11.5px; cursor: pointer; font-variant-numeric: tabular-nums; font-family: inherit; }
+.tchip.on { border-color: var(--blue); color: var(--ink); }
+.tchip.best { border-color: rgba(201,133,0,.6); }
+.deckfoot .ghost { margin-top: 8px; }
+
+/* ---------- rhythm strip ---------- */
+.rstrip { position: relative; height: 30px; margin-top: 6px; background: rgba(255,255,255,.03);
   border: 1px solid var(--grid); border-radius: 8px; }
-.rw { position: absolute; top: 5px; bottom: 5px; border-radius: 4px; background: rgba(57,135,229,.28);
+.rw { position: absolute; top: 4px; bottom: 4px; border-radius: 4px; background: rgba(57,135,229,.28);
   border: 1px solid rgba(57,135,229,.45); font-size: 9.5px; color: var(--ink-2); overflow: hidden;
   display: flex; align-items: center; justify-content: center; white-space: nowrap; cursor: default; }
 .rw.ref { background: rgba(25,158,112,.24); border-color: rgba(25,158,112,.5); }
 .rw.fz { background: rgba(208,59,59,.22); border-color: rgba(208,59,59,.55); color: var(--ink); }
 .rw.fill { background: rgba(144,133,233,.18); border-style: dashed; border-color: rgba(144,133,233,.6); color: var(--violet); }
-.rp { position: absolute; top: 5px; bottom: 5px; border-radius: 4px;
+.rp { position: absolute; top: 4px; bottom: 4px; border-radius: 4px;
   background: repeating-linear-gradient(45deg, rgba(201,133,0,.18), rgba(201,133,0,.18) 4px, transparent 4px, transparent 8px);
   border: 1px dashed rgba(201,133,0,.55); font-size: 9px; color: var(--yellow);
   display: flex; align-items: center; justify-content: center; }
@@ -67,22 +118,8 @@
 .pacebar .needle { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--ink); border-radius: 1px; }
 .pace .val { font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
-/* ---------- takes ---------- */
-.attrow { border-top: 1px dashed var(--grid); margin-top: 14px; padding-top: 12px; }
-.attrow .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.attrow .n { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
-.attrow .score { font-size: 26px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.attrow .delta { font-size: 12px; font-weight: 650; }
-.attrow .delta.up { color: var(--good); } .attrow .delta.dn { color: var(--critical); }
-.attrow .dims { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
-.dimchip { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 2px 8px; color: var(--ink-2); }
-.trend { display: flex; align-items: flex-end; gap: 4px; height: 38px; margin-top: 14px; }
-.trend i { width: 18px; background: var(--aqua); border-radius: 3px 3px 0 0; opacity: .5; }
-.trend i:last-child { opacity: 1; }
 .newbtn { display: inline-block; border: 1px solid var(--blue); color: var(--ink); background: rgba(57,135,229,0.14);
   border-radius: 10px; padding: 9px 20px; font-size: 14px; font-weight: 650; cursor: pointer; margin-top: 16px; }
-
-/* ---------- top stats ---------- */
 .topstats { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 10px;
   font-size: 12.5px; color: var(--ink-3); }
 .topstats b { color: var(--ink-2); }
@@ -105,9 +142,8 @@
 <div class="wrap">
 <div class="studio">
   <h1>Say anything. Hear <span style="color:var(--aqua)">yourself</span> say it fluently. Copy it till the graphs match.</h1>
-  <p class="sub">No warm-up, no chatbot. Hold the button and say the sentence you want to own — your first
-  sentence <b>becomes your voice clone</b>, and it gets better with every take. Each attempt is compared
-  against the fluent you: waveform, rhythm, pauses, fillers, word-level clarity.</p>
+  <p class="sub">No warm-up, no chatbot. Your first sentence <b>becomes your voice clone</b> — and it gets
+  better with every take.</p>
   <div class="topstats"><span id="stats"></span><span class="svc" id="svc"></span></div>
 
   <div class="ptt-wrap">
@@ -116,10 +152,22 @@
     <div class="ptt-hint" id="hint">hold — say the sentence you want to practice — release</div>
   </div>
 
+  <div id="empty">
+    <div class="steps">
+      <div class="step"><b>①</b> hold the button, say a sentence you want to own</div>
+      <div class="step"><b>②</b> hear <span style="color:var(--aqua)">yourself</span> say it fluently — your clone, native rhythm</div>
+      <div class="step"><b>③</b> copy it, take after take, until the graphs match</div>
+    </div>
+    <div class="inspire"><span class="ghost">need a sentence? try one of these — out loud:</span>
+      <span class="ichip">"Let me tell you about the project I'm most proud of."</span>
+      <span class="ichip">"Yesterday I went to an interview and it went better than I expected."</span>
+      <span class="ichip">"Honestly, I think we should ship it tonight."</span>
+    </div>
+  </div>
+
   <div id="clonetoast"></div>
   <div id="studio-you"></div>
-  <div id="studio-target"></div>
-  <div id="studio-takes"></div>
+  <div id="deck"></div>
   <div id="newwrap" style="text-align:center"></div>
 </div>
 </div>
@@ -129,9 +177,10 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const FILLER_RE = /^(um+|uh+|erm+|hmm+|like)$/i;
-const PX_PER_SEC = 130;              // 波形/节奏条统一时间比例 — 长短差异一眼可见
+const PX_PER_SEC = 130;               // 波形/节奏条统一时间比例
+const WAVE_H = 46, OVER_H = 56;
 
-let studio = null;                   // {heard, target, ref_words, ref_audio, pattern, attempts[]}
+let studio = null;   // {heard, target, ref_words, ref_audio, pattern, attempts[], hero, youOpen}
 let busy = false;
 
 /* ============ NDJSON reader ============ */
@@ -165,42 +214,73 @@ async function streamPost(url, fd, onStage){
   } finally { clearTimeout(watchdog); }
 }
 
-/* ============ 波形图: 真实幅度包络, 统一 px/s — "音频图的区别" ============ */
+/* ============ 音频解码缓存 + 波形绘制 ============ */
 let decodeCtx = null;
-async function drawWave(canvas, src, color){
-  try {
-    decodeCtx = decodeCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const ab = src instanceof Blob ? await src.arrayBuffer() : await (await fetch(src)).arrayBuffer();
-    const buf = await decodeCtx.decodeAudioData(ab);
-    const data = buf.getChannelData(0);
-    const w = Math.max(80, Math.round(buf.duration * PX_PER_SEC));
-    canvas.width = w; canvas.height = 46;
-    canvas.style.width = w + "px";
-    const ctx = canvas.getContext("2d");
-    const step = Math.max(1, Math.floor(data.length / w));
-    ctx.fillStyle = color;
-    for (let x = 0; x < w; x++){
-      let peak = 0;
-      const s0 = x * step, s1 = Math.min(s0 + step, data.length);
-      for (let i = s0; i < s1; i += 8){ const v = Math.abs(data[i]); if (v > peak) peak = v; }
-      const h = Math.max(1.5, peak * 44);
-      ctx.fillRect(x, (46 - h) / 2, 1, h);
-    }
-    ctx.fillStyle = "rgba(255,255,255,.12)";                       // 秒刻度线
-    for (let s = 1; s < buf.duration; s++) ctx.fillRect(Math.round(s * PX_PER_SEC), 0, 1, 46);
-  } catch (e) {
-    canvas.replaceWith(Object.assign(document.createElement("div"),
-      {className: "ghost", textContent: "waveform unavailable"}));
+const bufCache = new Map();           // key(url/blob) → AudioBuffer
+async function decodeSrc(src){
+  const key = src instanceof Blob ? src : "u:" + src;
+  if (bufCache.has(key)) return bufCache.get(key);
+  decodeCtx = decodeCtx || new (window.AudioContext || window.webkitAudioContext)();
+  const ab = src instanceof Blob ? await src.arrayBuffer() : await (await fetch(src)).arrayBuffer();
+  const buf = await decodeCtx.decodeAudioData(ab);
+  bufCache.set(key, buf);
+  return buf;
+}
+function envelope(buf, w){
+  const data = buf.getChannelData(0), step = Math.max(1, Math.floor(data.length / w));
+  const env = new Float32Array(w);
+  for (let x = 0; x < w; x++){
+    let peak = 0;
+    const s0 = x * step, s1 = Math.min(s0 + step, data.length);
+    for (let i = s0; i < s1; i += 8){ const v = Math.abs(data[i]); if (v > peak) peak = v; }
+    env[x] = peak;
+  }
+  return env;
+}
+function paintEnv(ctx, env, h, color, x0 = 0){
+  ctx.fillStyle = color;
+  for (let x = 0; x < env.length; x++){
+    const bh = Math.max(1.5, env[x] * (h - 4));
+    ctx.fillRect(x0 + x, (h - bh) / 2, 1, bh);
   }
 }
+function paintTicks(ctx, w, h, dur){
+  ctx.fillStyle = "rgba(255,255,255,.12)";
+  for (let s = 1; s < dur; s++) ctx.fillRect(Math.round(s * PX_PER_SEC), 0, 1, h);
+}
+async function drawWave(canvas, src, color){
+  try {
+    const buf = await decodeSrc(src);
+    const w = Math.max(80, Math.round(buf.duration * PX_PER_SEC));
+    canvas.width = w; canvas.height = WAVE_H; canvas.style.width = w + "px"; canvas.style.height = WAVE_H + "px";
+    const ctx = canvas.getContext("2d");
+    paintEnv(ctx, envelope(buf, w), WAVE_H, color);
+    paintTicks(ctx, w, WAVE_H, buf.duration);
+  } catch { canvas.replaceWith(Object.assign(document.createElement("div"),
+      {className: "ghost", textContent: "waveform unavailable"})); }
+}
+/* 叠影图: 参考(绿, 底) + 你的take(蓝, 面) — 音频图的区别一张图看完 */
+async function drawOverlay(canvas, refSrc, takeSrc){
+  try {
+    const [rb, tb] = await Promise.all([decodeSrc(refSrc), decodeSrc(takeSrc)]);
+    const dur = Math.max(rb.duration, tb.duration);
+    const w = Math.max(80, Math.round(dur * PX_PER_SEC));
+    canvas.width = w; canvas.height = OVER_H; canvas.style.width = w + "px"; canvas.style.height = OVER_H + "px";
+    const ctx = canvas.getContext("2d");
+    paintEnv(ctx, envelope(rb, Math.round(rb.duration * PX_PER_SEC)), OVER_H, "rgba(25,158,112,.38)");
+    paintEnv(ctx, envelope(tb, Math.round(tb.duration * PX_PER_SEC)), OVER_H, "rgba(57,135,229,.85)");
+    paintTicks(ctx, w, OVER_H, dur);
+    return true;
+  } catch { return false; }
+}
 
-/* ============ 节奏条 (px 与波形同比例, 上下可对齐比较) ============ */
+/* ============ 节奏条 (px 与波形同比例) ============ */
 function rhythmStrip(words, {ref = false} = {}){
   if (!words || words.length < 2) return "";
   const t0 = words[0].start, t1 = words[words.length - 1].end;
   const total = Math.max(t1 - t0, 0.4);
   const W = Math.max(80, Math.round(total * PX_PER_SEC));
-  const px = t => ((t - t0) / total * W);
+  const px = t => (t - t0) / total * W;
   let h = "";
   for (let i = 0; i < words.length; i++){
     const w = words[i];
@@ -228,86 +308,125 @@ function paceGauge(wps){
     <span class="val">${wps.toFixed(1)} w/s · ${label}</span></div>`;
 }
 
-/* ============ studio 渲染 ============ */
-function playBtn(src, label){
-  const b = document.createElement("button");
-  b.className = "play"; b.textContent = "▶ " + label;
-  b.onclick = () => { const a = new Audio(src); a.play().catch(() => {}); };
-  return b;
+/* ============ 播放 ============ */
+function playSrc(src, rate){
+  const a = new Audio(src instanceof Blob ? URL.createObjectURL(src) : src);
+  a.playbackRate = rate || 1;
+  try { a.preservesPitch = true; } catch {}
+  a.play().catch(() => {});
 }
+function dimClass(v){ return v == null ? "" : v >= 80 ? "g" : v >= 50 ? "y" : "r"; }
 
-function renderYou(j, blob){
-  $("studio-you").innerHTML = `<div class="pcard you"><div class="lab">your try</div>
+/* ============ YOUR TRY (参考出现后折叠) ============ */
+let youData = null;
+function renderYou(){
+  if (!youData) return;
+  const j = youData;
+  if (!studio.youOpen && studio.ref_audio){
+    $("studio-you").innerHTML = `<div class="pcard you"><div class="youmini" id="youmini">
+      <span class="cap">your try</span><span class="txt">“${esc(j.heard)}”</span>
+      <span class="ghost" style="flex:none">${(j.errors || []).length ? (j.errors || []).length + " fix" + ((j.errors || []).length > 1 ? "es" : "") : "clean"}</span>
+      <span class="chev">▸ details</span></div></div>`;
+    $("youmini").onclick = () => { studio.youOpen = true; renderYou(); };
+    return;
+  }
+  const chips = (j.errors || []).map(e =>
+    `<span class="errchip${e.type === "habit" ? " habit" : ""}">${esc(e.type)} · “${esc(e.span)}” → <b>${esc(e.correction)}</b></span>`).join("");
+  $("studio-you").innerHTML = `<div class="pcard you">
+    <div class="lab">your try ${studio.ref_audio ? '<button class="ghostlink" id="youfold" style="float:right">▾ fold</button>' : ""}</div>
     <div class="sent">“${esc(j.heard)}”</div>
+    <button class="play" id="youplay">▶ your audio</button>
     <div class="wavebox"><canvas id="you-wave"></canvas></div>
     ${rhythmStrip(j.words)}
     ${j.fl_meta && j.fl_meta.wps != null ? paceGauge(j.fl_meta.wps) : ""}
-    <div id="you-extra"></div>
+    ${chips ? `<div class="errchips">${chips}</div>` : ""}
+    ${j.note ? `<div class="note">💡 ${esc(j.note)}</div>` : ""}
     <div class="badge">${esc(j.stt_engine)}</div></div>`;
-  const sent = $("studio-you").querySelector(".sent");
-  sent.after(playBtn(blob ? URL.createObjectURL(blob) : j.audio, "your audio"));
-  drawWave($("you-wave"), blob || j.audio, "rgba(57,135,229,.9)");
+  $("youplay").onclick = () => playSrc(j._blob || j.audio);
+  const yf = $("youfold");
+  if (yf) yf.onclick = () => { studio.youOpen = false; renderYou(); };
+  drawWave($("you-wave"), j._blob || j.audio, "rgba(57,135,229,.9)");
 }
 
-function renderTargetCard(targetText, errors, note, changed){
-  const chips = (errors || []).map(e =>
-    `<span class="errchip${e.type === "habit" ? " habit" : ""}">${esc(e.type)} · “${esc(e.span)}” → <b>${esc(e.correction)}</b></span>`).join("");
-  const extra = $("you-extra");
-  if (extra) extra.innerHTML =
-    (chips ? `<div class="errchips">${chips}</div>` : "") +
-    (note ? `<div class="note">💡 ${esc(note)}</div>` : "");
-  $("studio-target").innerHTML = `<div class="pcard target">
-    <div class="lab">the fluent you${changed ? "" : " · your sentence, native rhythm"}</div>
-    <div class="sent">“${esc(targetText)}”</div>
-    <div id="ref-media"><span class="ghost pulse">cloning the sound of you being fluent…</span></div></div>`;
-}
-
-function renderRef(j){
-  studio.ref_audio = j.audio; studio.ref_words = j.words || []; studio.pattern = j.pattern || "";
-  const m = $("ref-media");
-  m.innerHTML = `<div class="wavebox"><canvas id="ref-wave"></canvas></div>
-    ${rhythmStrip(studio.ref_words, {ref: true})}
-    <div class="badge">${j.own_voice ? "your cloned voice · " : "fallback voice (clone pending) · "}${esc(j.engine)}</div>`;
-  m.prepend(playBtn(j.audio, "the fluent you"));
-  drawWave($("ref-wave"), j.audio, "rgba(25,158,112,.95)");
-  new Audio(j.audio).play().catch(() => {});
-  $("ptt").classList.add("imitate");
-  $("ptt").innerHTML = "IMITATE";
-  $("hint").textContent = "now copy it — hold, say it, release. as many takes as you want.";
-  $("newwrap").innerHTML = `<button class="newbtn" id="newbtn">🆕 practice a new sentence</button>`;
-  $("newbtn").onclick = resetStudio;
-}
-
-function renderTakes(){
+/* ============ Compare Deck ============ */
+function renderDeck(){
+  if (!studio || !studio.target) { $("deck").innerHTML = ""; return; }
   const takes = studio.attempts;
-  if (!takes.length){ $("studio-takes").innerHTML = ""; return; }
-  const rows = takes.map((a, i) => {
-    const prev = i > 0 ? takes[i - 1].composite : null;
+  const hero = studio.hero != null ? studio.hero : takes.length - 1;
+  const a = takes[hero];
+  const best = takes.length ? takes.reduce((m, x, i) => x.composite > takes[m].composite ? i : m, 0) : -1;
+
+  let refMedia;
+  if (studio.ref_audio){
+    refMedia = `
+      <button class="play aq" id="refplay">▶ the fluent you <kbd>R</kbd></button>
+      <button class="play" id="refslow">🐢 slow <kbd>S</kbd></button>
+      <div class="wavebox"><canvas id="ref-wave"></canvas></div>
+      ${rhythmStrip(studio.ref_words, {ref: true})}
+      <div class="badge">${studio.ref_own ? "your cloned voice" : "fallback voice — clone pending"} · ${esc(studio.ref_engine || "")}</div>`;
+  } else {
+    refMedia = `<div class="skel"></div><div class="ghost pulse" style="margin-top:6px">${esc(studio.ref_wait || "cloning the sound of you being fluent…")}</div>`;
+  }
+
+  let takeLane;
+  if (!takes.length){
+    takeLane = `<div class="lane take"><div class="lanehead"><span class="lab">your take</span>
+      <span class="ghost">hold the button (or <kbd style="border:1px solid var(--hairline);border-radius:4px;padding:0 5px;font-size:11px">space</kbd>) and copy it — first take starts the graph</span></div></div>`;
+  } else {
+    const prev = hero > 0 ? takes[hero - 1].composite : null;
     const d = prev == null ? "" : (a.composite - prev >= 0 ? `<span class="delta up">▲${a.composite - prev}</span>`
                                                           : `<span class="delta dn">▼${prev - a.composite}</span>`);
     const dims = [["said it", a.dims.match], ["pron*", a.dims.pron], ["rhythm*", a.dims.rhythm], ["smooth", a.dims.smooth]]
-      .filter(x => x[1] != null).map(x => `<span class="dimchip">${x[0]} ${x[1]}</span>`).join("");
-    return `<div class="attrow"><div class="head"><span class="n">take ${i + 1}</span>
-      <span class="score">${a.composite}</span>${d}<span class="dims">${dims}</span></div>
-      <div class="wavebox"><canvas id="att-wave-${i}"></canvas></div>
+      .filter(x => x[1] != null)
+      .map(x => `<span class="dimchip ${dimClass(x[1])}">${x[0]} ${x[1]}</span>`).join("");
+    takeLane = `<div class="lane take">
+      <div class="lanehead"><span class="lab">take ${hero + 1}${hero === best ? " · best" : ""}</span>
+        <span class="score">${a.composite}</span>${d}<span class="dims">${dims}</span></div>
+      <button class="play" id="takeplay">▶ this take</button>
+      <div class="wavebox"><canvas id="overlay-wave"></canvas></div>
+      <div class="overlaycap"><span><i style="background:rgba(25,158,112,.5)"></i>the fluent you</span>
+        <span><i style="background:rgba(57,135,229,.85)"></i>you, take ${hero + 1}</span>
+        <span class="ghost">same time scale — longer bars = slower, gaps = pauses</span></div>
       ${rhythmStrip(a.words)}
-      ${a.fast_tracked ? '<div class="ghost" style="color:var(--aqua);margin-top:4px">mistake card fast-tracked ⚡</div>' : ""}</div>`;
-  }).join("");
-  const trend = takes.length > 1
-    ? `<div class="trend">${takes.map(a => `<i style="height:${Math.max(8, a.composite * 0.38)}px" title="${a.composite}"></i>`).join("")}</div>` : "";
-  $("studio-takes").innerHTML = `<div class="pcard"><div class="lab" style="color:var(--ink-3)">your takes — vs the fluent you</div>
-    ${rows}${trend}
-    <div class="ghost" style="margin-top:10px">* pron = ASR-confidence proxy · rhythm = rough timing match — direction, not lab precision</div></div>`;
-  takes.forEach((a, i) => {
-    const cv = $(`att-wave-${i}`);
-    if (cv) drawWave(cv, a._blob || a.audio, "rgba(57,135,229,.9)");
-  });
+      ${a.fast_tracked ? '<div class="ghost" style="color:var(--aqua);margin-top:4px">mistake card fast-tracked ⚡</div>' : ""}
+    </div>`;
+  }
+
+  const chips = takes.length > 1 || (takes.length === 1 && hero !== 0)
+    ? `<div class="takechips">${takes.map((x, i) =>
+        `<button class="tchip${i === hero ? " on" : ""}${i === best ? " best" : ""}" data-i="${i}">t${i + 1} · ${x.composite}${i === best ? " 🏆" : ""}</button>`).join("")}
+       <span class="ghost" style="margin-left:6px">tap to compare an earlier take</span></div>` : "";
+
+  $("deck").innerHTML = `<div class="deck">
+    <div class="lane ref"><div class="lanehead"><span class="lab">the fluent you${studio.changed === false ? " · your sentence, native rhythm" : ""}</span>
+      <span class="sent" style="flex:1">“${esc(studio.target)}”</span></div>${refMedia}</div>
+    ${takeLane}
+    <div class="deckfoot">${chips}
+      <div class="ghost">* pron = ASR-confidence proxy · rhythm = rough timing match — direction, not lab precision</div></div>
+  </div>`;
+
+  if (studio.ref_audio){
+    $("refplay").onclick = () => playSrc(studio.ref_audio);
+    $("refslow").onclick = () => playSrc(studio.ref_audio, 0.7);
+    drawWave($("ref-wave"), studio.ref_audio, "rgba(25,158,112,.95)");
+  }
+  if (takes.length){
+    $("takeplay").onclick = () => playSrc(a._blob || a.audio);
+    if (studio.ref_audio){
+      drawOverlay($("overlay-wave"), studio.ref_audio, a._blob || a.audio)
+        .then(ok => { if (!ok) drawWave($("overlay-wave"), a._blob || a.audio, "rgba(57,135,229,.9)"); });
+    } else {
+      drawWave($("overlay-wave"), a._blob || a.audio, "rgba(57,135,229,.9)");
+    }
+  }
+  $("deck").querySelectorAll(".tchip").forEach(c => c.onclick = () => { studio.hero = +c.dataset.i; renderDeck(); });
 }
 
 function resetStudio(){
-  studio = null;
-  ["studio-you", "studio-target", "studio-takes", "clonetoast"].forEach(x => $(x).innerHTML = "");
+  studio = null; youData = null;
+  ["studio-you", "deck", "clonetoast"].forEach(x => $(x).innerHTML = "");
   $("newwrap").innerHTML = "";
+  $("empty").style.display = "";
   $("ptt").classList.remove("imitate");
   $("ptt").innerHTML = "HOLD<br>&amp; SPEAK";
   $("hint").textContent = "hold — say the sentence you want to practice — release";
@@ -316,20 +435,25 @@ function resetStudio(){
 /* ============ 说 → 纠 → 克隆参考 ============ */
 async function sendSay(blob){
   busy = true;
-  studio = {attempts: []};
+  studio = {attempts: [], hero: null, youOpen: true};
+  youData = null;
+  $("empty").style.display = "none";
   $("studio-you").innerHTML = `<div class="pcard you"><div class="lab">your try</div><span class="dots"></span></div>`;
-  $("studio-target").innerHTML = ""; $("studio-takes").innerHTML = ""; $("newwrap").innerHTML = "";
+  $("deck").innerHTML = ""; $("newwrap").innerHTML = "";
   const fd = new FormData();
   fd.append("file", blob, "say.webm");
   await streamPost("/api/practice/say", fd, j => { switch (j.stage){
     case "stt":
       studio.heard = j.heard;
-      renderYou(j, blob);
-      $("hint").textContent = "finding the fluent version…";
+      youData = {...j, _blob: blob};
+      renderYou();
+      $("hint").textContent = "coach is reading it (Opus)…";
       break;
     case "target":
-      studio.target = j.target;
-      renderTargetCard(j.target, j.errors, j.note, j.changed);
+      studio.target = j.target; studio.changed = j.changed;
+      youData = {...youData, errors: j.errors, note: j.note};
+      renderYou();
+      renderDeck();
       if (j.degraded) $("clonetoast").innerHTML = '<div class="ghost">coach offline — practicing your sentence as-is</div>';
       break;
     case "clone":
@@ -339,11 +463,21 @@ async function sendSay(blob){
       refreshState();
       break;
     case "ref":
-      renderRef(j);
+      studio.ref_audio = j.audio; studio.ref_words = j.words || [];
+      studio.ref_own = j.own_voice; studio.ref_engine = j.engine; studio.pattern = j.pattern || "";
+      studio.youOpen = false;
+      renderYou();
+      renderDeck();
+      playSrc(j.audio);
+      $("ptt").classList.add("imitate");
+      $("ptt").innerHTML = "IMITATE";
+      $("hint").innerHTML = 'copy it — hold &amp; speak · <kbd>R</kbd> replay · <kbd>S</kbd> slow';
+      $("newwrap").innerHTML = `<button class="newbtn" id="newbtn">🆕 practice a new sentence</button>`;
+      $("newbtn").onclick = resetStudio;
       break;
     case "error":
       if (!j.recoverable){ resetStudio(); $("hint").textContent = j.error || "try again"; }
-      else { const m = $("ref-media"); if (m) m.innerHTML = `<div class="ghost">reference audio unavailable (${esc(j.at)}) — read the target aloud anyway</div>`; }
+      else { studio.ref_wait = "reference audio unavailable — read the target aloud anyway"; renderDeck(); }
       break;
     case "done":
       refreshState();
@@ -367,9 +501,10 @@ async function sendAttempt(blob){
   if (!r.ok){ $("hint").textContent = j.error || "couldn't hear that — one more?"; return; }
   j._blob = blob;
   studio.attempts.push(j);
-  renderTakes();
-  $("hint").textContent = j.passed ? "🔥 again for rhythm — or 🆕 for a new sentence"
-                                   : "some words missing — ▶ listen once more, then go again";
+  studio.hero = studio.attempts.length - 1;
+  renderDeck();
+  $("hint").innerHTML = j.passed ? '🔥 again for rhythm — <kbd>R</kbd> to re-listen, or 🆕 new sentence'
+                                 : 'some words missing — <kbd>R</kbd> listen again, then another take';
 }
 
 /* ============ PTT + 实时波形 ============ */
@@ -425,7 +560,10 @@ $("ptt").addEventListener("pointerdown", e => { e.preventDefault(); startRec(); 
 $("ptt").addEventListener("pointerup", stopRec);
 $("ptt").addEventListener("pointerleave", stopRec);
 window.addEventListener("keydown", e => {
-  if (e.code === "Space" && !e.repeat && !e.target.matches("input,textarea")){ e.preventDefault(); startRec(); }
+  if (e.target.matches("input,textarea")) return;
+  if (e.code === "Space" && !e.repeat){ e.preventDefault(); startRec(); }
+  else if (e.code === "KeyR" && studio && studio.ref_audio) playSrc(studio.ref_audio);
+  else if (e.code === "KeyS" && studio && studio.ref_audio) playSrc(studio.ref_audio, 0.7);
 });
 window.addEventListener("keyup", e => {
   if (e.code === "Space" && !e.target.matches("input,textarea")){ e.preventDefault(); stopRec(); }

@@ -89,21 +89,39 @@ def is_parrot(heard: str, recast: str) -> bool:
     return inter / len(th) >= 0.75 and len(th) <= len(tr) + 3
 
 
-def echo_compare(echo_stt: dict, echo_text: str, recast: str, orig: dict) -> dict:
-    """echo 跟读 vs 目标句 + vs 首次尝试。纯本地信号, 无 LLM。
-    结果只报方向 + 粗 delta (措辞: rough single-sentence signal, 不装精度)。"""
-    match = token_overlap(echo_text, recast)
-    passed = match >= 0.8
-    out = {"match": round(match, 2), "passed": passed, "heard": echo_text}
-    fl, fl_meta = fluency_score(echo_stt, echo_text)
-    pr, pr_meta = pron_score(echo_stt, echo_text)
-    if fl is not None and orig.get("fl") is not None:
-        out["fluency_delta"] = fl - orig["fl"]
-    if pr is not None and orig.get("pr") is not None:
-        out["pron_delta"] = pr - orig["pr"]
-    if fl_meta.get("fillers") is not None and orig.get("fillers") is not None:
-        out["fillers_delta"] = fl_meta["fillers"] - orig["fillers"]
-    return out
+def polish_compare(att_stt: dict, att_text: str, ref_text: str, ref_words: list) -> dict:
+    """打磨循环: 一次模仿尝试 vs 克隆声参考。全本地信号, 无 LLM, ~秒回。
+    维度: match(说全了吗) / pron(ASR proxy) / rhythm(时长+停顿贴合, rough) / smooth(填充词+停顿)。"""
+    from collections import Counter
+    ta, tb = _tokens(att_text), _tokens(ref_text)
+    inter = sum((Counter(ta) & Counter(tb)).values()) if ta and tb else 0
+    match = inter / max(len(ta), len(tb)) if ta and tb else 0.0     # 双向: 少说多说都扣
+
+    pr, pr_meta = pron_score(att_stt, att_text)
+
+    att_words = att_stt.get("words", [])
+    rhythm = None
+    if len(att_words) >= 2 and len(ref_words) >= 2 and match >= 0.6:
+        att_dur = att_words[-1]["end"] - att_words[0]["start"]
+        ref_dur = ref_words[-1]["end"] - ref_words[0]["start"]
+        ratio = att_dur / ref_dur if ref_dur else 1.0
+        att_pauses = sum(1 for i in range(len(att_words) - 1)
+                         if att_words[i + 1]["start"] - att_words[i]["end"] > 0.4)
+        ref_pauses = sum(1 for i in range(len(ref_words) - 1)
+                         if ref_words[i + 1]["start"] - ref_words[i]["end"] > 0.4)
+        rhythm = round(max(0.0, 100 - abs(1 - ratio) * 140 - max(0, att_pauses - ref_pauses) * 18))
+
+    n_fill = len(FILLERS.findall(att_text))
+    smooth = round(max(0.0, 100 - n_fill * 25 - (att_stt.get("pause_ratio") or 0) * 250))
+
+    dims = {"match": round(match * 100), "pron": pr, "rhythm": rhythm, "smooth": smooth}
+    weights = {"match": 0.35, "pron": 0.25, "rhythm": 0.25, "smooth": 0.15}
+    avail = {k: v for k, v in dims.items() if v is not None}
+    wsum = sum(weights[k] for k in avail)
+    composite = round(sum(weights[k] * v for k, v in avail.items()) / wsum) if avail else 0
+    return {"heard": att_text, "words": att_words, "dims": dims,
+            "composite": composite, "passed": match >= 0.8,
+            "fillers": n_fill, "pr_meta": pr_meta}
 
 
 def compose_turn(judge: dict, fl, pr, n_words: int) -> dict:

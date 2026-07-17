@@ -487,34 +487,18 @@ async def turn(file: UploadFile = File(...)):
         if log_entry:
             SESSION["scene_log"].append(log_entry)
 
-        # ---- echo 邀约 (稀缺才珍贵: recast 存在 + 高价值 + ≥3轮间隔 + 非宽限期) ----
+        # 打磨循环由前端在 fix 音频到达时自动开启 (openPolish), 服务端不再做 echo 邀约门控
         recast = judge.get("recast")
-        echo_offer = None
-        grace = SESSION["mode"] == "free" and turn_i <= GRACE_TURNS   # 宽限只管闲聊; 你主动选的练习模式, 反馈即产品
-        if (recast and not degraded and SESSION["mode"] in ("free", "review", "scenario") and not grace
-                and turn_i - SESSION["last_echo_turn"] >= ECHO_MIN_GAP
-                and turn_result.get("complexity", 1) >= 2):
-            due_set = {c["pattern"] for c in briefing["due_cards"]}
-            worthy = any((e.get("pattern") in due_set or e.get("severity") == "blocking"
-                          or store.cards.get(e.get("pattern"), {}).get("hits", 0) >= 2)
-                         for e in judge.get("errors", []))
-            if worthy:
-                SESSION["last_echo_turn"] = turn_i
-                echo_offer = {"recast": recast, "pattern": focus_pattern,
-                              "orig": {"fl": fl, "pr": pr, "fillers": fl_meta.get("fillers")}}
+        grace = SESSION["mode"] == "free" and turn_i <= GRACE_TURNS   # 宽限只藏分数/错误标签; 自声修正照播
         SESSION["last_recast"] = recast or judge.get("native") or ""
 
-        now = int(time.time())
-        hunting = [{"pattern": c["pattern"], "R": round(memory.retrievability(c, now), 2),
-                    "due_in": c["due_at"] - now} for c in store.due_cards(limit=3)]
         yield ev("judge", reply=judge.get("reply", ""), recast=recast, native=judge.get("native"),
                  errors=judge.get("errors", [])[:3], focus_pattern=focus_pattern,
                  scores=turn_result, fl_meta=fl_meta, pr_meta=pr_meta,
                  elicited={} if parrot else (judge.get("elicited") or {}), parrot=parrot,
                  level=memory.level_of(store.profile["skills"]), skills=store.profile["skills"],
                  xp=store.profile["xp"], lv=memory.xp_level(store.profile["xp"]),
-                 hunting=hunting, scene=scene_out, echo_offer=echo_offer,
-                 grace=grace, degraded=degraded)
+                 scene=scene_out, grace=grace, degraded=degraded)
 
         # ---- 双路 TTS 并行, 完成即推 ----
         reply = judge.get("reply", "")
@@ -527,13 +511,19 @@ async def turn(file: UploadFile = File(...)):
         jobs = {}
         if reply:
             jobs[EX.submit(tts.say, reply, "tutor", AUDIO / f"reply_{ts}")] = ("reply", AUDIO / f"reply_{ts}")
-        if fix_text and not grace and not store.profile.get("gentle_mode"):
-            jobs[EX.submit(tts.say, fix_text, fix_voice, AUDIO / f"fix_{ts}")] = ("fix", AUDIO / f"fix_{ts}")
+        # 自声修正是产品本体: 宽限期也播; 只有温柔模式才静音。
+        # 打磨循环的参考: with-timestamps 合成 → 参考图谱 (词级时间轴) 零额外调用
+        if fix_text and not store.profile.get("gentle_mode"):
+            jobs[EX.submit(tts.say_with_timing, fix_text, fix_voice, AUDIO / f"fix_{ts}")] = ("fix", AUDIO / f"fix_{ts}")
         try:
             for f in as_completed(jobs, timeout=40):
                 kind, out = jobs[f]
                 try:
-                    engine = f.result()
+                    ref_words = []
+                    if kind == "fix":
+                        engine, ref_words = f.result()
+                    else:
+                        engine = f.result()
                     url = f"/audio/{tts.audio_path(out).name}"
                     if kind == "fix" and log_entry is not None:
                         log_entry["polished_audio"] = url
@@ -544,7 +534,9 @@ async def turn(file: UploadFile = File(...)):
                             "own_voice": fix_voice == "user", "engine": engine,
                             "words": stt.get("words", []), "ts": int(time.time())}, ensure_ascii=False))
                     yield ev("tts", kind=kind, audio=url, engine=engine,
-                             own_voice=(kind == "fix" and fix_voice == "user"))
+                             own_voice=(kind == "fix" and fix_voice == "user"),
+                             ref_text=fix_text if kind == "fix" else None,
+                             ref_words=ref_words if kind == "fix" else None)
                 except Exception as e:
                     yield ev("error", at=f"tts-{kind}", error=str(e)[:150], recoverable=True)
         except Exception:
@@ -554,26 +546,30 @@ async def turn(file: UploadFile = File(...)):
     return StreamingResponse(gen(), media_type="application/x-ndjson")
 
 
-# ============================================================ echo 跟读
-@app.post("/api/echo")
-async def echo(file: UploadFile = File(...), recast: str = Form(...), pattern: str = Form(""),
-               fl: str = Form(""), pr: str = Form(""), fillers: str = Form("")):
-    """跟读打分: 纯 STT + token 对齐 + delta, 无 LLM (~2s)。一次机会, 无重试。"""
+# ============================================================ 打磨循环 (说→纠→反复模仿)
+@app.post("/api/polish/attempt")
+async def polish_attempt(file: UploadFile = File(...), ref_text: str = Form(...),
+                         ref_words: str = Form("[]"), pattern: str = Form(""),
+                         attempt: int = Form(1)):
+    """一次模仿尝试: STT → 与克隆声参考做 match/pron/rhythm/smooth 四维对比。
+    无 LLM, ~1-2s 回。第一次达标且带 pattern → SRS 学习步 fast-track (仅一次)。"""
     ts = int(time.time() * 10) % 10_000_000
     try:
-        wav = _to_wav(await file.read(), f"echo_{ts}")
+        wav = _to_wav(await file.read(), f"att_{ts}")
         stt = stt_mod.transcribe(str(wav))
     except Exception as e:
         return JSONResponse({"error": f"audio failed: {e}"}, status_code=400)
     heard = (stt.get("text") or "").strip()
     if not heard:
-        return JSONResponse({"error": "no speech detected"}, status_code=400)
-    orig = {"fl": float(fl) if fl else None, "pr": float(pr) if pr else None,
-            "fillers": int(fillers) if fillers else None}
-    result = scoring.echo_compare(stt, heard, recast, orig)
-    result["words"] = stt.get("words", [])      # echo 节奏条: 和原句 strip 叠放对比
+        return JSONResponse({"error": "no speech detected — hold while you speak"}, status_code=400)
+    try:
+        rw = json.loads(ref_words)
+    except json.JSONDecodeError:
+        rw = []
+    result = scoring.polish_compare(stt, heard, ref_text, rw)
+    result["audio"] = f"/audio/att_{ts}.wav"
     result["fast_tracked"] = False
-    if result["passed"] and pattern:
+    if result["passed"] and pattern and attempt == 1:
         result["fast_tracked"] = store.echo_pass(pattern)
         store.save()
     return result

@@ -99,6 +99,63 @@ def _say_mock(out: Path):
                                for t in range(8000)))
 
 
+def _synth_words(text: str) -> list:
+    """mock/兜底: 按词长合成时间轴 (UI 无 key 可开发)。"""
+    words, t = [], 0.15
+    for w in text.replace(".", "").replace(",", "").split():
+        dur = 0.16 + 0.05 * min(len(w), 8) / 2
+        words.append({"text": w, "start": round(t, 2), "end": round(t + dur, 2), "logprob": -0.05})
+        t += dur + 0.07
+    return words
+
+
+def say_with_timing(text: str, voice: str, out: Path) -> tuple[str, list]:
+    """→ (engine, words) — 打磨循环的参考音频: ElevenLabs with-timestamps 端点
+    返回字符级时间戳, 聚合成词级 → 参考图谱不花额外调用。失败退回普通 say, words=[]。"""
+    if os.environ.get("FLUENTME_MOCK"):
+        _say_mock(out.with_suffix(".wav"))
+        return "mock", _synth_words(text)
+    key = _eleven_key()
+    voices = _eleven_voices()
+    vid = voices.get("user") if voice == "user" else os.environ.get("ELEVEN_TUTOR_VOICE", ELEVEN_TUTOR_DEFAULT)
+    if key and vid:
+        try:
+            import base64
+            model = os.environ.get("ELEVEN_TTS_MODEL", "eleven_flash_v2_5")
+            req = urllib.request.Request(
+                f"https://api.elevenlabs.io/v1/text-to-speech/{vid}/with-timestamps?output_format=mp3_44100_128",
+                data=json.dumps({"text": text, "model_id": model}).encode(),
+                headers={"xi-api-key": key, "Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                d = json.loads(r.read())
+            mp3 = out.with_suffix(".mp3")
+            mp3.write_bytes(base64.b64decode(d["audio_base64"]))
+            al = d.get("alignment") or {}
+            chars = al.get("characters", [])
+            t0s = al.get("character_start_times_seconds", [])
+            t1s = al.get("character_end_times_seconds", [])
+            words, cur = [], None
+            for c, a, b in zip(chars, t0s, t1s):
+                if c.strip():
+                    if cur is None:
+                        cur = {"text": c, "start": a, "end": b, "logprob": None}
+                    else:
+                        cur["text"] += c
+                        cur["end"] = b
+                else:
+                    if cur:
+                        words.append(cur)
+                        cur = None
+            if cur:
+                words.append(cur)
+            if mp3.stat().st_size > 2000:
+                out.with_suffix(".wav").unlink(missing_ok=True)
+                return "elevenlabs · " + model.replace("eleven_", "").replace("_", "-"), words
+        except Exception:
+            pass
+    return say(text, voice, out), []
+
+
 def say(text: str, voice: str, out: Path) -> str:
     """返回引擎标签, 界面 badge 直接显示。out 后缀由引擎决定, 调用方用返回的真实路径。"""
     if os.environ.get("FLUENTME_MOCK"):

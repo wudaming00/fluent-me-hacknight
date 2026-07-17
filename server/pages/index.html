@@ -70,10 +70,26 @@ textarea { width: 100%; min-height: 90px; background: var(--page); border: 1px s
   border-radius: 10px; padding: 10px 22px; font-size: 14.5px; font-weight: 650; cursor: pointer; }
 .startbtn.end { border-color: var(--hairline); background: transparent; color: var(--ink-2); }
 .startbtn:disabled { opacity: .5; }
-.echobox { border: 1px solid rgba(25,158,112,.5); background: rgba(25,158,112,.07); border-radius: 12px;
-  padding: 12px 16px; margin: 10px 0; font-size: 15px; line-height: 1.6; }
-.echobox .lab { font-size: 11px; color: var(--aqua); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.echores { font-size: 13px; margin-top: 8px; color: var(--ink-2); }
+/* 打磨循环: 说→纠→反复模仿到满意 */
+.polishbox { border: 1px solid rgba(25,158,112,.5); background: rgba(25,158,112,.06); border-radius: 14px;
+  padding: 14px 18px; margin: 12px 0; }
+.polishbox .lab { font-size: 11px; color: var(--aqua); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 700; }
+.refrow { font-size: 15.5px; line-height: 1.6; }
+.refrow .play { border: 1px solid var(--aqua); background: rgba(25,158,112,.14); color: var(--ink);
+  border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin-right: 8px; }
+.refcap { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-top: 10px; }
+.attrow { border-top: 1px dashed var(--grid); margin-top: 12px; padding-top: 10px; }
+.attrow .head { display: flex; align-items: baseline; gap: 10px; }
+.attrow .n { font-size: 11px; color: var(--ink-3); }
+.attrow .score { font-size: 24px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.attrow .delta { font-size: 12px; font-weight: 650; }
+.attrow .delta.up { color: var(--good); } .attrow .delta.dn { color: var(--critical); }
+.attrow .dims { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.dimchip { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 2px 8px; color: var(--ink-2); }
+.trend { display: flex; align-items: flex-end; gap: 4px; height: 34px; margin-top: 12px; }
+.trend i { width: 16px; background: var(--aqua); border-radius: 3px 3px 0 0; opacity: .55; }
+.trend i:last-child { opacity: 1; }
+.polishactions { margin-top: 12px; display: flex; gap: 12px; align-items: center; }
 .beatstrip { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
 .beat { font-size: 11.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 4px 10px; color: var(--ink-3); }
 .beat.cur { border-color: var(--blue); color: var(--ink); box-shadow: 0 0 10px rgba(57,135,229,.25); }
@@ -290,14 +306,6 @@ textarea { width: 100%; min-height: 90px; background: var(--page); border: 1px s
       <div class="panel" id="scenepanel" style="display:none"><h3 id="scenepanel-h">Scene</h3><div id="scenepanel-b"></div></div>
 
       <div class="panel">
-        <h3>🎯 Kai is secretly hunting</h3>
-        <div class="hunt" id="hunt"><div class="huntnote">no due cards yet — make some mistakes first 😉</div></div>
-        <div class="huntnote">Your overdue mistake-cards, weakest memory first. Kai engineers questions whose natural
-        answer needs the pattern — use it right and the card levels up. Strength bars are estimates
-        (FSRS-inspired defaults, not a fitted model).</div>
-      </div>
-
-      <div class="panel">
         <h3>You</h3>
         <div class="stat"><span>Level <span class="proxy">(estimate)</span></span><span class="lvl" id="lvl">—</span></div>
         <div class="stat"><span>Lv (xp)</span><b id="lvxp">—</b></div>
@@ -317,7 +325,8 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let ST = null;                       // /api/state cache
 let sessionOn = false, mode = "free", scene = null, ivPlan = null, prPlan = null, SUGG = [];
-let echoOffer = null, echoArmed = false, lastTurnErrors = [], gentleLog = [];
+let polish = null;                   // 打磨循环: {ref_text, ref_words, ref_audio, pattern, attempts[]}
+let lastTurnErrors = [], gentleLog = [];
 
 /* ================= audio queue + barge-in ================= */
 const audioQ = []; let nowPlaying = null;
@@ -577,7 +586,7 @@ $("pr-gen").onclick = async () => {
 
 /* ================= session ================= */
 function beginSession(r){
-  sessionOn = true; scene = r.scene || null; echoOffer = null; echoArmed = false;
+  sessionOn = true; scene = r.scene || null; polish = null;
   lastTurnErrors = []; gentleLog = [];
   $("chat").innerHTML = ""; $("reportbox").innerHTML = ""; $("echobox").innerHTML = "";
   ["setup-scenario","setup-interview","setup-present"].forEach(x => $(x).style.display = "none");
@@ -594,7 +603,6 @@ function beginSession(r){
     b.appendChild(a); b.insertAdjacentHTML("beforeend", `<div class="badge">${r.engine}</div>`);
     enqueueAudio(a);
   }
-  renderHunt((r.briefing.due_cards || []).map(c => ({pattern: c.pattern, R: c.R})), {});
 }
 
 $("startbtn").onclick = async () => {
@@ -611,7 +619,7 @@ async function endSession(){
   $("startbtn").disabled = true;
   const r = await (await fetch("/api/session/end", {method: "POST"})).json();
   sessionOn = false; $("ptt").disabled = true; $("ptt").className = "ptt"; $("ptt").innerHTML = "HOLD<br>TO TALK";
-  $("echobox").innerHTML = ""; $("scenebar").innerHTML = "";
+  polish = null; $("echobox").innerHTML = ""; $("scenebar").innerHTML = "";
   $("startbtn").disabled = false; $("startbtn").className = "startbtn"; $("startbtn").textContent = "▶ Start session";
   $("hint").textContent = "session saved to memory";
   renderReport(r);
@@ -719,15 +727,67 @@ function paceGauge(wps){
 }
 function fmtPat(p){ return (p || "").replace(/-/g, " "); }
 
-function renderHunt(list, hits){
-  if (!list || !list.length){ $("hunt").innerHTML = '<div class="huntnote">no due cards — clean slate ✨</div>'; return; }
-  $("hunt").innerHTML = list.map(c => {
-    const p = c.pattern || c, R = c.R;
-    const hit = hits && hits[p] === true;
-    const col = R == null ? "" : (R >= .6 ? "var(--aqua)" : R >= .3 ? "var(--yellow)" : "var(--critical)");
-    return `<div class="huntchip ${hit ? "hit" : ""}"><span class="k">${p}</span> — ${hit ? "✓ used correctly — card leveled up!" : "waiting for a natural opening…"}
-      ${R != null ? `<div class="rbar"><i style="width:${Math.round(R * 100)}%;background:${col}"></i></div>` : ""}</div>`;
+/* ============ 打磨循环 (核心交互): 说→纠→反复模仿→图谱对比→评分 ============ */
+let lastFocusPattern = "";
+function openPolish(refText, refWords, refAudio){
+  polish = {ref_text: refText, ref_words: refWords || [], ref_audio: refAudio,
+            pattern: lastFocusPattern || "", attempts: []};
+  renderPolish();
+  $("ptt").classList.add("echo"); $("ptt").innerHTML = "IMITATE";
+  $("hint").textContent = "that's you, fluent — hold and copy it. as many takes as you want.";
+}
+function closePolish(){
+  polish = null;
+  $("echobox").innerHTML = "";
+  $("ptt").classList.remove("echo"); $("ptt").innerHTML = "HOLD<br>TO TALK";
+  $("hint").textContent = "hold — speak English — release";
+}
+function renderPolish(){
+  if (!polish) return;
+  const p = polish;
+  const atts = p.attempts.map((a, i) => {
+    const prev = i > 0 ? p.attempts[i - 1].composite : null;
+    const d = prev == null ? "" : (a.composite - prev >= 0 ? `<span class="delta up">▲${a.composite - prev}</span>`
+                                                          : `<span class="delta dn">▼${prev - a.composite}</span>`);
+    const dims = [["said it", a.dims.match], ["pron*", a.dims.pron], ["rhythm*", a.dims.rhythm], ["smooth", a.dims.smooth]]
+      .filter(x => x[1] != null).map(x => `<span class="dimchip">${x[0]} ${x[1]}</span>`).join("");
+    return `<div class="attrow"><div class="head"><span class="n">take ${i + 1}</span>
+      <span class="score">${a.composite}</span>${d}<span class="dims">${dims}</span></div>
+      ${rhythmStrip(a.words, {legend: false})}
+      ${a.fast_tracked ? '<div class="ghost" style="margin-top:4px;color:var(--aqua)">card fast-tracked ⚡</div>' : ""}</div>`;
   }).join("");
+  const trend = p.attempts.length > 1
+    ? `<div class="trend">${p.attempts.map(a => `<i style="height:${Math.max(8, a.composite * 0.34)}px" title="${a.composite}"></i>`).join("")}</div>` : "";
+  $("echobox").innerHTML = `<div class="polishbox">
+    <div class="lab">polish — say it like the fluent you</div>
+    <div class="refrow"><button class="play" id="refplay">▶ reference</button>“${esc(p.ref_text)}”</div>
+    ${p.ref_words.length > 1 ? `<div class="refcap">the fluent you</div>${rhythmStrip(p.ref_words, {legend: false})}` : ""}
+    ${p.attempts.length ? `<div class="refcap">your takes</div>` : ""}${atts}${trend}
+    <div class="polishactions">
+      <span class="ghost">hold the mic button for another take</span>
+      <button class="ghostlink" id="polishdone" style="margin-left:auto">✓ done — keep talking</button>
+    </div>
+    <div class="ghost" style="margin-top:8px">* pron is ASR-confidence proxy · rhythm is a rough timing match — direction, not lab precision</div>
+  </div>`;
+  $("refplay").onclick = () => { const a = new Audio(p.ref_audio); stopAllAudio(); a.play().catch(() => {}); };
+  $("polishdone").onclick = closePolish;
+}
+async function postAttempt(blob){
+  const p = polish;
+  $("hint").textContent = "listening to your take…";
+  const fd = new FormData();
+  fd.append("file", blob, "att.webm");
+  fd.append("ref_text", p.ref_text);
+  fd.append("ref_words", JSON.stringify(p.ref_words));
+  fd.append("pattern", p.pattern || "");
+  fd.append("attempt", String(p.attempts.length + 1));
+  const r = await fetch("/api/polish/attempt", {method: "POST", body: fd});
+  const j = await r.json();
+  if (!r.ok){ $("hint").textContent = j.error || "couldn't hear that — one more?"; return; }
+  p.attempts.push(j);
+  renderPolish();
+  $("hint").textContent = j.passed ? "nice — again for rhythm, or ✓ done"
+                                   : "missing words — listen once more, then again";
 }
 
 function scorePanel(sc, grace){
@@ -809,7 +869,8 @@ function handleStages(youBub){
       const grace = j.grace;
       lastTurnErrors = j.errors || [];
       if (ST.profile.gentle_mode) (j.errors || []).forEach(e => gentleLog.push({pattern: e.pattern}));
-      const showCorr = !grace && !ST.profile.gentle_mode;
+      const showFix = !ST.profile.gentle_mode;          // recast 文本+自声音频: 宽限期也给 (产品本体)
+      const showCorr = !grace && !ST.profile.gentle_mode; // 错误标签/含糊词: 宽限期先不吓人
       let extra = "";
       if (showCorr && j.errors && j.errors.length){
         const focus = j.errors.find(e => e.pattern === j.focus_pattern) || j.errors[0];
@@ -817,8 +878,8 @@ function handleStages(youBub){
         extra += `<div class="errchips"><span class="errchip">${esc(focus.type)} · “${esc(focus.span)}” → <b>${esc(focus.correction)}</b></span>
           ${rest > 0 ? `<span class="ghost">+${rest} noted quietly — they'll come back when you're ready</span>` : ""}</div>`;
       }
-      if (showCorr && j.recast) extra += `<div class="fix"><span class="lab">recast</span>${esc(j.recast)}</div>`;
-      if (showCorr && j.native && j.native !== j.recast) extra += `<div class="fix"><span class="lab">native</span>${esc(j.native)}</div>`;
+      if (showFix && j.recast) extra += `<div class="fix"><span class="lab">recast</span>${esc(j.recast)}</div>`;
+      if (showFix && j.native && j.native !== j.recast) extra += `<div class="fix"><span class="lab">native</span>${esc(j.native)}</div>`;
       const uw = (j.pr_meta || {}).unclear_words;
       if (showCorr && uw && uw.length) extra += `<div class="unclear">came out fuzzy (ASR proxy): ${esc(uw.join(", "))}</div>`;
       if (j.parrot) extra += `<div class="ghost" style="margin-top:4px">echoing me? nice try — say it in your own sentence for credit 😉</div>`;
@@ -827,11 +888,10 @@ function handleStages(youBub){
       kaiBub.innerHTML = `<div class="who">kai${scene ? " · in character" : ""}</div>${esc(j.reply)}` +
         (j.degraded ? `<div class="badge">judge offline — conversation continues</div>` : "");
       scorePanel(j.scores, grace);
-      renderHunt(j.hunting, j.elicited);
       renderScenePanel(j.scene);
+      lastFocusPattern = j.focus_pattern || "";
       $("lvl").textContent = j.level; $("xptotal").textContent = j.xp;
       if (j.lv) $("lvxp").textContent = "Lv " + j.lv.lv + " · " + j.xp + "/" + j.lv.next_at;
-      echoOffer = j.echo_offer || null;
       $("ptt").disabled = false;
       $("hint").textContent = "speaking…";
       break; }
@@ -843,7 +903,8 @@ function handleStages(youBub){
       target.appendChild(a);
       target.insertAdjacentHTML("beforeend",
         `<div class="badge">${isFix ? (j.own_voice ? "☝ your voice, fluent · " : "☝ Kai's voice — your twin is offline · ") : ""}${j.engine}</div>`);
-      enqueueAudio(a, isFix ? () => armEcho() : null);
+      // 流利版一到 → 打磨面板开 (核心循环: 反复模仿这条参考直到满意)
+      enqueueAudio(a, isFix ? () => openPolish(j.ref_text, j.ref_words, j.audio) : null);
       if (isFix) fixMeta = true;
       break; }
     case "error":
@@ -857,63 +918,9 @@ function handleStages(youBub){
       }
       break;
     case "done":
-      if (echoOffer && !fixMeta) armEcho();   // 没有 fix 音频也可以 echo (文字 recast 已显示)
-      if (!echoArmed) $("hint").textContent = "hold — speak English — release";
+      if (!polish) $("hint").textContent = "hold — speak English — release";
       break;
   }};
-}
-
-/* ================= echo loop ================= */
-function armEcho(){
-  if (!echoOffer || echoArmed || !sessionOn) return;
-  echoArmed = true;
-  $("ptt").classList.add("echo"); $("ptt").innerHTML = "ECHO";
-  $("hint").textContent = "that's you — try it on: hold and say it back";
-  $("echobox").innerHTML = `<div class="echobox"><div class="lab">say it back — one shot</div>
-    “${esc(echoOffer.recast)}” <button class="ghostlink" id="echoskip" style="float:right">maybe later</button>
-    <div class="echores" id="echores"></div></div>`;
-  $("echoskip").onclick = disarmEcho;
-}
-function disarmEcho(){
-  echoArmed = false; echoOffer = null;
-  $("ptt").classList.remove("echo"); $("ptt").innerHTML = "HOLD<br>TO TALK";
-  $("echobox").innerHTML = "";
-  $("hint").textContent = "hold — speak English — release";
-}
-async function postEcho(blob){
-  const offer = echoOffer;
-  $("hint").textContent = "listening to your echo…";
-  const fd = new FormData();
-  fd.append("file", blob, "echo.webm");
-  fd.append("recast", offer.recast);
-  fd.append("pattern", offer.pattern || "");
-  if (offer.orig.fl != null) fd.append("fl", offer.orig.fl);
-  if (offer.orig.pr != null) fd.append("pr", offer.orig.pr);
-  if (offer.orig.fillers != null) fd.append("fillers", offer.orig.fillers);
-  const r = await fetch("/api/echo", {method: "POST", body: fd});
-  const j = await r.json();
-  const el = $("echores");
-  if (!r.ok){ if (el) el.textContent = j.error || "couldn't hear that"; setTimeout(disarmEcho, 2500); return; }
-  if (el){
-    // 节奏对比: 第一次尝试 vs 跟读 — 两条 strip 叠放, 停顿/填充词的消失肉眼可见
-    let strips = "";
-    if (lastWords.length > 1 && (j.words || []).length > 1){
-      strips = `<div class="echostrips"><div class="cap">your first try</div>${rhythmStrip(lastWords, {legend: false})}
-        <div class="cap">your echo</div>${rhythmStrip(j.words, {legend: false})}</div>`;
-    }
-    if (j.passed){
-      const bits = [];
-      if (j.fluency_delta != null) bits.push(`${j.fluency_delta >= 0 ? "smoother" : "rougher"} than your first try`);
-      if (j.fillers_delta != null && j.fillers_delta < 0) bits.push("fewer fillers");
-      el.innerHTML = `✓ Nailed it${bits.length ? " — " + bits.join(", ") : ""}.` +
-        (j.fast_tracked ? ` <span style="color:var(--aqua)">card fast-tracked ⚡ (still needs to come up naturally to level further)</span>` : "") +
-        strips +
-        `<div class="ghost">rough single-sentence signal, not a lab measurement</div>`;
-    } else {
-      el.innerHTML = `So close — the fluent you says it exactly like the card. It'll come around again naturally.` + strips;
-    }
-  }
-  setTimeout(disarmEcho, 8000);   // 有对比条要看, 多留几秒
 }
 
 /* ================= PTT ================= */
@@ -934,13 +941,13 @@ async function startRec(){
     const cv = $("wavec"), ctx2 = cv.getContext("2d");
     cv.classList.add("on");
     ctx2.clearRect(0, 0, cv.width, cv.height);
-    const col = echoArmed ? "rgba(25,158,112,.9)" : "rgba(57,135,229,.9)";
+    const col = polish ? "rgba(25,158,112,.9)" : "rgba(57,135,229,.9)";
     let x = 0;
     const loop = () => {
       an.getByteTimeDomainData(buf);
       let s = 0; for (let i = 0; i < buf.length; i++){ const v = (buf[i] - 128) / 128; s += v * v; }
       const rms = Math.sqrt(s / buf.length);
-      $("ptt").style.boxShadow = `0 0 ${12 + rms * 220}px rgba(${echoArmed ? "25,158,112" : "208,59,59"},.45)`;
+      $("ptt").style.boxShadow = `0 0 ${12 + rms * 220}px rgba(${polish ? "25,158,112" : "208,59,59"},.45)`;
       // 滚动波形: 每帧画一根 RMS 竖线, 到头回卷
       const h = Math.max(2, rms * cv.height * 2.6);
       ctx2.fillStyle = col;
@@ -958,7 +965,7 @@ async function startRec(){
     $("ptt").classList.remove("rec");
     const blob = new Blob(chunks, {type: mr.mimeType});
     if (blob.size < 2000){ $("hint").textContent = "too short — hold while you speak"; return; }
-    if (echoArmed){ postEcho(blob); return; }
+    if (polish){ postAttempt(blob); return; }
     $("hint").textContent = "transcribing…";
     $("ptt").disabled = true;
     const youBub = bubble(`<div class="who">you</div><span class="dots"></span>`, "you");
@@ -967,7 +974,7 @@ async function startRec(){
   };
   mr.start();
   $("ptt").classList.add("rec");
-  $("hint").textContent = echoArmed ? "echoing… release when done" : "I'm listening — take your time.";
+  $("hint").textContent = polish ? "recording your take… release when done" : "I'm listening — take your time.";
 }
 function stopRec(){ if (mr && mr.state === "recording") mr.stop(); }
 $("ptt").addEventListener("pointerdown", e => { e.preventDefault(); startRec(); });

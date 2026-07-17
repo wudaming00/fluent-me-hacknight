@@ -3,319 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fluent Me — a tutor that remembers you</title>
+<title>Fluent Me — practice studio</title>
 <link rel="stylesheet" href="/static/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗣</text></svg>">
 <style>
-.cols { display: grid; grid-template-columns: 1fr 340px; gap: 26px; align-items: start; margin-top: 8px; }
-@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
-.panel { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; background: var(--surface); }
-.panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin: 0 0 12px; }
+.studio { max-width: 880px; margin: 0 auto; }
 
-/* ---------- onboarding ---------- */
-.ob { max-width: 640px; margin: 40px auto; }
-.ob h2 { font-size: 22px; margin-bottom: 6px; }
-.ob .sub { margin-bottom: 22px; }
-.ob label { display:block; font-size: 12.5px; color: var(--ink-3); margin: 16px 0 6px; text-transform: uppercase; letter-spacing: .6px; }
-.ob input[type=text] { width: 100%; background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
-  color: var(--ink); font-size: 15px; padding: 10px 12px; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { border: 1px solid var(--hairline); border-radius: 20px; padding: 6px 14px; font-size: 13.5px;
-  color: var(--ink-2); cursor: pointer; user-select: none; background: transparent; }
-.chip.on { border-color: var(--blue); color: var(--ink); background: rgba(57,135,229,.12); }
-.script-card { border: 1px solid rgba(57,135,229,.35); background: rgba(57,135,229,.06); border-radius: 12px;
-  padding: 16px 18px; font-size: 15.5px; line-height: 1.7; margin: 14px 0; }
-.payoff-label { font-size: 12px; letter-spacing: 2px; color: var(--aqua); text-transform: uppercase; font-weight: 700; margin: 18px 0 8px; }
-.ghost { color: var(--ink-3); font-size: 12.5px; }
-.ghostlink { color: var(--ink-3); font-size: 12.5px; text-decoration: underline; cursor: pointer; background:none; border:none; }
-.pulse { animation: pulse 1.4s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: .45; } }
-
-/* ---------- mode tabs + setup ---------- */
-.modes { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
-.mtab { border: 1px solid var(--hairline); background: transparent; color: var(--ink-2); border-radius: 10px;
-  padding: 8px 16px; font-size: 13.5px; cursor: pointer; }
-.mtab.on { border-color: var(--blue); color: var(--ink); background: rgba(57,135,229,.12); font-weight: 650; }
-.mtab:disabled { opacity: .4; cursor: not-allowed; }
-.mtab .n { font-size: 11px; color: var(--yellow); margin-left: 5px; }
-.goalchip { display: inline-flex; gap: 8px; align-items: center; border: 1px solid rgba(201,133,0,.5); border-radius: 10px;
-  padding: 7px 12px; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; cursor: pointer; }
-.sugg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-@media (max-width: 700px){ .sugg { grid-template-columns: 1fr; } }
-.sc { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 16px; cursor: pointer; background: var(--surface); }
-.sc:hover { border-color: rgba(57,135,229,.5); }
-.sc.wild { border-color: rgba(144,133,233,.5); }
-.sc .t { font-weight: 650; font-size: 14.5px; margin-bottom: 4px; }
-.sc .hook { font-size: 12px; color: var(--violet); font-style: italic; margin-bottom: 6px; }
-.sc .d { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
-.sc .pats { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
-.sc .pat { font-size: 10.5px; border: 1px solid rgba(201,133,0,.5); border-radius: 8px; padding: 2px 7px; color: var(--yellow); font-family: ui-monospace, monospace; }
-textarea { width: 100%; min-height: 90px; background: var(--page); border: 1px solid var(--hairline); border-radius: 8px;
-  color: var(--ink); font-size: 13.5px; padding: 10px 12px; font-family: inherit; resize: vertical; }
-.qrow { font-size: 13px; color: var(--ink-2); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
-.qrow .k { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; margin-right: 8px; }
-
-/* ---------- session ---------- */
-.ptt-wrap { text-align: center; margin: 18px 0 6px; }
-.ptt { width: 112px; height: 112px; border-radius: 50%; border: 2px solid var(--blue);
+/* ---------- PTT ---------- */
+.ptt-wrap { text-align: center; margin: 26px 0 8px; }
+.ptt { width: 128px; height: 128px; border-radius: 50%; border: 2px solid var(--blue);
   background: rgba(57,135,229,0.10); color: var(--ink); font-size: 14px; font-weight: 650;
   cursor: pointer; user-select: none; transition: transform .12s, border-color .3s;
   -webkit-tap-highlight-color: transparent; touch-action: none; }
-.ptt:disabled { opacity: .35; cursor: not-allowed; }
 .ptt.rec { border-color: var(--critical); background: rgba(208,59,59,0.16); transform: scale(1.06); }
-.ptt.echo { border-color: var(--aqua); background: rgba(25,158,112,0.12); }
-.ptt.echo.rec { border-color: var(--aqua); background: rgba(25,158,112,0.22); }
-.ptt-hint { color: var(--ink-3); font-size: 12.5px; margin-top: 8px; min-height: 17px; }
-.startbtn { display: inline-block; border: 1px solid var(--blue); color: var(--ink); background: rgba(57,135,229,0.14);
-  border-radius: 10px; padding: 10px 22px; font-size: 14.5px; font-weight: 650; cursor: pointer; }
-.startbtn.end { border-color: var(--hairline); background: transparent; color: var(--ink-2); }
-.startbtn:disabled { opacity: .5; }
-/* 打磨循环: 说→纠→反复模仿到满意 */
-.polishbox { border: 1px solid rgba(25,158,112,.5); background: rgba(25,158,112,.06); border-radius: 14px;
-  padding: 14px 18px; margin: 12px 0; }
-.polishbox .lab { font-size: 11px; color: var(--aqua); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; font-weight: 700; }
-.refrow { font-size: 15.5px; line-height: 1.6; }
-.refrow .play { border: 1px solid var(--aqua); background: rgba(25,158,112,.14); color: var(--ink);
-  border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin-right: 8px; }
-.refcap { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-top: 10px; }
-.attrow { border-top: 1px dashed var(--grid); margin-top: 12px; padding-top: 10px; }
-.attrow .head { display: flex; align-items: baseline; gap: 10px; }
-.attrow .n { font-size: 11px; color: var(--ink-3); }
-.attrow .score { font-size: 24px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.attrow .delta { font-size: 12px; font-weight: 650; }
-.attrow .delta.up { color: var(--good); } .attrow .delta.dn { color: var(--critical); }
-.attrow .dims { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
-.dimchip { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 2px 8px; color: var(--ink-2); }
-.trend { display: flex; align-items: flex-end; gap: 4px; height: 34px; margin-top: 12px; }
-.trend i { width: 16px; background: var(--aqua); border-radius: 3px 3px 0 0; opacity: .55; }
-.trend i:last-child { opacity: 1; }
-.polishactions { margin-top: 12px; display: flex; gap: 12px; align-items: center; }
-.beatstrip { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
-.beat { font-size: 11.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 4px 10px; color: var(--ink-3); }
-.beat.cur { border-color: var(--blue); color: var(--ink); box-shadow: 0 0 10px rgba(57,135,229,.25); }
-.beat.done { border-color: rgba(12,163,12,.5); color: var(--good); }
-.drill { font-size: 12px; color: var(--yellow); margin: 8px 0; }
+.ptt.imitate { border-color: var(--aqua); background: rgba(25,158,112,0.12); }
+.ptt.imitate.rec { border-color: var(--aqua); background: rgba(25,158,112,0.22); }
+.ptt-hint { color: var(--ink-3); font-size: 13px; margin-top: 10px; min-height: 18px; }
+#wavec { display: none; width: 100%; max-width: 480px; height: 40px; margin: 10px auto 0; }
+#wavec.on { display: block; }
 
-.chat { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
-.bub { max-width: 88%; padding: 11px 14px; border-radius: 12px; font-size: 14px; line-height: 1.55;
-  background: rgba(255,255,255,0.05); border: 1px solid var(--hairline); }
-.bub.you { align-self: flex-end; border-color: rgba(57,135,229,0.4); }
-.bub.tutor { align-self: flex-start; }
-.bub .who { font-size: 10.5px; text-transform: uppercase; letter-spacing: .7px; color: var(--ink-3); margin-bottom: 3px; }
-.bub audio { height: 30px; margin-top: 6px; width: 100%; }
+/* ---------- cards ---------- */
+.pcard { border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px;
+  background: var(--surface); margin-top: 16px; }
+.pcard .lab { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 8px; }
+.pcard.you .lab { color: var(--blue); }
+.pcard.target { border-color: rgba(25,158,112,.55); background: rgba(25,158,112,.05); }
+.pcard.target .lab { color: var(--aqua); }
+.sent { font-size: 17px; line-height: 1.6; }
+.wavebox { overflow-x: auto; margin-top: 10px; }
+.wavebox canvas { display: block; height: 46px; }
+.play { border: 1px solid var(--hairline); background: rgba(255,255,255,.05); color: var(--ink);
+  border-radius: 8px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin: 0 8px 8px 0; }
+.pcard.target .play { border-color: var(--aqua); background: rgba(25,158,112,.14); }
+.badge { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 6px; }
+.note { font-size: 13px; color: var(--yellow); margin-top: 8px; }
+.errchips { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.errchip { font-size: 11.5px; border: 1px solid rgba(208,59,59,.45); color: var(--ink-2); border-radius: 12px; padding: 3px 10px; }
+.errchip b { color: var(--ink); font-weight: 600; }
+.errchip.habit { border-color: rgba(144,133,233,.55); }
+.ghost { color: var(--ink-3); font-size: 12.5px; }
 .dots::after { content: "· · ·"; animation: dots 1.2s steps(3) infinite; color: var(--ink-3); }
 @keyframes dots { 33% { content: "•· ·"; } 66% { content: "·•·"; } }
-.fix { margin-top: 8px; border-top: 1px dashed var(--grid); padding-top: 8px; }
-.fix .lab { font-size: 10.5px; color: var(--aqua); text-transform: uppercase; letter-spacing: .6px; margin-right: 6px; }
-/* ---------- 声学/文本节奏可视化 ---------- */
-.rstrip { position: relative; height: 34px; margin-top: 10px; background: rgba(255,255,255,.03);
-  border: 1px solid var(--grid); border-radius: 8px; overflow: hidden; }
+.pulse { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
+
+/* ---------- rhythm strip (与波形同 px/s 比例) ---------- */
+.rstrip { position: relative; height: 32px; margin-top: 8px; background: rgba(255,255,255,.03);
+  border: 1px solid var(--grid); border-radius: 8px; }
 .rw { position: absolute; top: 5px; bottom: 5px; border-radius: 4px; background: rgba(57,135,229,.28);
   border: 1px solid rgba(57,135,229,.45); font-size: 9.5px; color: var(--ink-2); overflow: hidden;
   display: flex; align-items: center; justify-content: center; white-space: nowrap; cursor: default; }
+.rw.ref { background: rgba(25,158,112,.24); border-color: rgba(25,158,112,.5); }
 .rw.fz { background: rgba(208,59,59,.22); border-color: rgba(208,59,59,.55); color: var(--ink); }
 .rw.fill { background: rgba(144,133,233,.18); border-style: dashed; border-color: rgba(144,133,233,.6); color: var(--violet); }
 .rp { position: absolute; top: 5px; bottom: 5px; border-radius: 4px;
   background: repeating-linear-gradient(45deg, rgba(201,133,0,.18), rgba(201,133,0,.18) 4px, transparent 4px, transparent 8px);
   border: 1px dashed rgba(201,133,0,.55); font-size: 9px; color: var(--yellow);
   display: flex; align-items: center; justify-content: center; }
-.rlegend { display: flex; gap: 12px; align-items: center; font-size: 10.5px; color: var(--ink-3); margin-top: 5px; flex-wrap: wrap; }
-.rlegend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 .pace { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.pace .lab { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; width: 38px; }
-.pacebar { position: relative; flex: 1; height: 8px; border-radius: 4px; background: var(--grid); }
+.pace .plab { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; width: 38px; }
+.pacebar { position: relative; flex: 1; max-width: 300px; height: 8px; border-radius: 4px; background: var(--grid); }
 .pacebar .band { position: absolute; top: 0; bottom: 0; background: rgba(25,158,112,.25); border-radius: 4px; }
 .pacebar .needle { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--ink); border-radius: 1px; }
-.pace .val { font-size: 11px; color: var(--ink-2); width: 88px; text-align: right; font-variant-numeric: tabular-nums; }
-#wavec { display: none; width: 100%; max-width: 420px; height: 40px; margin: 8px auto 0; }
-#wavec.on { display: block; }
-.echostrips .cap { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-top: 8px; }
+.pace .val { font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
-.errchips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.errchip { font-size: 11.5px; border: 1px solid rgba(208,59,59,.45); color: var(--ink-2); border-radius: 12px; padding: 3px 10px; }
-.errchip b { color: var(--ink); font-weight: 600; }
-.badge { font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
-.unclear { font-size: 11px; color: var(--yellow); margin-top: 5px; }
+/* ---------- takes ---------- */
+.attrow { border-top: 1px dashed var(--grid); margin-top: 14px; padding-top: 12px; }
+.attrow .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.attrow .n { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .5px; }
+.attrow .score { font-size: 26px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.attrow .delta { font-size: 12px; font-weight: 650; }
+.attrow .delta.up { color: var(--good); } .attrow .delta.dn { color: var(--critical); }
+.attrow .dims { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.dimchip { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 9px; padding: 2px 8px; color: var(--ink-2); }
+.trend { display: flex; align-items: flex-end; gap: 4px; height: 38px; margin-top: 14px; }
+.trend i { width: 18px; background: var(--aqua); border-radius: 3px 3px 0 0; opacity: .5; }
+.trend i:last-child { opacity: 1; }
+.newbtn { display: inline-block; border: 1px solid var(--blue); color: var(--ink); background: rgba(57,135,229,0.14);
+  border-radius: 10px; padding: 9px 20px; font-size: 14px; font-weight: 650; cursor: pointer; margin-top: 16px; }
 
-/* ---------- right column ---------- */
-.dim { margin-bottom: 10px; }
-.dim .row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
-.dim .row b { color: var(--ink); font-variant-numeric: tabular-nums; }
-.bar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
-.bar i { display: block; height: 100%; border-radius: 3px; background: var(--blue); width: 0%; transition: width .5s; }
-.dim.g .bar i { background: var(--blue); } .dim.v .bar i { background: var(--violet); }
-.dim.f .bar i { background: var(--aqua); } .dim.p .bar i { background: var(--yellow); }
-.proxy { font-size: 10px; color: var(--ink-3); }
-.bigscore { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-.bigscore .n { font-size: 38px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.bigscore .xp { color: var(--aqua); font-size: 13px; font-weight: 650; }
-.bigscore .cx { color: var(--ink-3); font-size: 12px; }
-.foldbtn { background: none; border: none; color: var(--ink-3); font-size: 11.5px; cursor: pointer; padding: 0; margin-bottom: 8px; }
-.hunt { display: flex; flex-direction: column; gap: 7px; }
-.huntchip { font-size: 12px; border: 1px solid rgba(201,133,0,.5); border-radius: 10px; padding: 6px 10px; color: var(--ink-2); }
-.huntchip.hit { border-color: var(--good); color: var(--ink); background: rgba(12,163,12,.08); }
-.huntchip .k { font-family: ui-monospace, monospace; font-size: 11px; color: var(--yellow); }
-.huntchip.hit .k { color: var(--good); }
-.rbar { height: 4px; border-radius: 2px; background: var(--grid); margin-top: 5px; overflow: hidden; }
-.rbar i { display: block; height: 100%; transition: width .6s linear; }
-.huntnote { font-size: 11.5px; color: var(--ink-3); margin-top: 10px; line-height: 1.5; }
-.stat { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-2); padding: 3px 0; }
-.stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
-.lvl { font-size: 20px; font-weight: 750; color: var(--violet); }
-.svc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+/* ---------- top stats ---------- */
+.topstats { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 10px;
+  font-size: 12.5px; color: var(--ink-3); }
+.topstats b { color: var(--ink-2); }
+.svc { display: flex; flex-wrap: wrap; gap: 6px; }
 .svc span { font-size: 10.5px; border: 1px solid var(--hairline); border-radius: 10px; padding: 2px 9px; color: var(--ink-3); }
 .svc span.on { color: var(--aqua); border-color: rgba(25,158,112,.5); }
-.star { display: inline-flex; gap: 4px; margin: 4px 0; }
-.star span { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--hairline); display: inline-flex;
-  align-items: center; justify-content: center; font-size: 11px; color: var(--ink-3); }
-.star span.ok { border-color: rgba(12,163,12,.6); color: var(--good); }
-.star span.miss { border-color: rgba(208,59,59,.6); color: var(--critical); }
-.tbar { height: 8px; border-radius: 4px; background: var(--grid); overflow: hidden; margin: 6px 0; }
-.tbar i { display: block; height: 100%; }
-.report { border: 1px solid rgba(144,133,233,.5); border-radius: 14px; padding: 16px 18px; margin-top: 14px;
-  background: rgba(144,133,233,.06); font-size: 14px; line-height: 1.6; }
-.report b { color: var(--violet); }
-.report table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
-.report th { text-align: left; color: var(--ink-3); font-size: 10.5px; text-transform: uppercase; padding: 4px 6px; border-bottom: 1px solid var(--hairline); }
-.report td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--ink-2); }
+.clonetoast { font-size: 12px; color: var(--aqua); margin-top: 6px; }
 </style>
 </head>
 <body>
 <nav>
   <div class="brand">Fluent <span>Me</span></div>
   <a class="item active" href="/">Practice</a>
+  <a class="item" href="/talk">Talk to Kai</a>
   <a class="item" href="/progress">Progress</a>
   <a class="item" href="/me">Me</a>
   <a class="item" href="/demo">Demo</a>
-  <div class="right" id="rightbar">a tutor that remembers you · in your own voice</div>
+  <div class="right" id="rightbar">say it · hear yourself fluent · polish it</div>
 </nav>
 <div class="wrap">
+<div class="studio">
+  <h1>Say anything. Hear <span style="color:var(--aqua)">yourself</span> say it fluently. Copy it till the graphs match.</h1>
+  <p class="sub">No warm-up, no chatbot. Hold the button and say the sentence you want to own — your first
+  sentence <b>becomes your voice clone</b>, and it gets better with every take. Each attempt is compared
+  against the fluent you: waveform, rhythm, pauses, fillers, word-level clarity.</p>
+  <div class="topstats"><span id="stats"></span><span class="svc" id="svc"></span></div>
 
-<!-- ==================== ONBOARDING ==================== -->
-<div id="ob" style="display:none">
-  <div class="ob" id="ob1" style="display:none">
-    <h2>First, the ten-second version of you.</h2>
-    <p class="sub">Kai remembers everything you tell him — starting now.</p>
-    <label>What should Kai call you?</label>
-    <input type="text" id="ob-name" placeholder="your name" maxlength="40">
-    <label>Your first language</label>
-    <div class="chips" id="ob-lang"></div>
-    <label>What's English for, right now? (pick up to 2)</label>
-    <div class="chips" id="ob-goal"></div>
-    <div style="margin-top:26px"><button class="startbtn" id="ob1-next">Next — lend me your voice →</button></div>
+  <div class="ptt-wrap">
+    <button class="ptt" id="ptt">HOLD<br>&amp; SPEAK</button>
+    <canvas id="wavec" width="960" height="80"></canvas>
+    <div class="ptt-hint" id="hint">hold — say the sentence you want to practice — release</div>
   </div>
 
-  <div class="ob" id="ob2" style="display:none">
-    <h2>Lend me your voice for a minute.</h2>
-    <p class="sub">Read this out loud — play with it, be dramatic. The better the performance, the better your fluent
-    twin. <span class="ghost">(Audio stays on this machine unless you enable cloud voice.)</span></p>
-    <div class="script-card">Okay, weird experiment: I'm reading this so a computer can learn my voice.
-    Three thick birds chirped through the thunder — that's the hard part. Now the fun part: WOW, this actually
-    works? Ask me anything. Last year I visited a very unusual zoo, measured a huge orange treasure, and joyfully
-    refused to leave. Red lorry, yellow lorry. Would you believe the fluent version of me is about to say hello?
-    Alright, future me — your turn.</div>
-    <div style="text-align:center">
-      <button class="ptt" id="ob-rec">TAP TO<br>RECORD</button>
-      <div class="ptt-hint" id="ob-rec-hint">tap · read the card · tap again when done (45–90s is perfect)</div>
-    </div>
-    <div style="margin-top:16px; text-align:center" id="ob2-status"></div>
-  </div>
-
-  <div class="ob" id="ob3" style="display:none">
-    <div class="payoff-label">This is you, fluent.</div>
-    <div id="ob3-body"><span class="pulse">building your fluent twin…</span></div>
-    <p class="sub" style="margin-top:14px">Same voice. Same person. Just further along. Everything Kai corrects
-    will be spoken back like this — by the you that already made it.</p>
-    <p class="ghost">Sounds a little unfamiliar? Everyone's recorded voice does — you hear yourself through bone,
-    the world hears this. You'll get used to it fast, and it's worth it.</p>
-    <div style="margin-top:22px">
-      <button class="startbtn" id="ob3-go">▶ Start my first session</button>
-      <button class="ghostlink" id="ob3-tutor" style="margin-left:14px">Rather hear corrections in Kai's voice instead</button>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== MAIN ==================== -->
-<div id="main" style="display:none">
-  <h1>Talk. It listens, remembers, and answers back — <span style="color:var(--blue)">in your voice, fluent.</span></h1>
-  <p class="sub">Every mistake becomes a memory card. Kai steers future conversation so you face it again right
-  before you'd forget — spaced repetition hidden inside small talk, never a flashcard. Corrections come back in
-  <b>your own cloned voice</b>: the fluent you, already existing.</p>
-
-  <div id="goalchip"></div>
-  <div class="modes" id="modes"></div>
-
-  <div class="cols">
-    <div>
-      <!-- setup panels -->
-      <div class="panel" id="setup-scenario" style="display:none">
-        <h3>Scenes from your life <button class="ghostlink" id="sc-regen" style="float:right">↻ new ideas</button></h3>
-        <div class="ghost" id="sugg-note">Kai builds these from what he remembers about you.</div>
-        <div class="sugg" id="sugg"></div>
-      </div>
-      <div class="panel" id="setup-interview" style="display:none">
-        <h3>Mock interview setup</h3>
-        <textarea id="jd" placeholder="paste the job description…"></textarea>
-        <div class="ghost" style="margin:10px 0 6px">— or build it from what Kai knows about you —</div>
-        <div class="chips" id="iv-facts"></div>
-        <input type="text" id="iv-role" placeholder="role hint (optional), e.g. solutions engineer" style="width:100%;background:var(--page);border:1px solid var(--hairline);border-radius:8px;color:var(--ink);font-size:13px;padding:8px 12px;margin-top:10px">
-        <div style="margin-top:12px"><button class="startbtn" id="iv-gen">Generate mock →</button> <span class="ghost" id="iv-status"></span></div>
-        <div id="iv-plan"></div>
-      </div>
-      <div class="panel" id="setup-present" style="display:none">
-        <h3>Presentation rehearsal setup</h3>
-        <textarea id="pr-outline" placeholder="paste your outline / bullets…"></textarea>
-        <div style="margin-top:10px">target <input type="text" id="pr-min" value="3" style="width:46px;background:var(--page);border:1px solid var(--hairline);border-radius:6px;color:var(--ink);padding:5px 8px;text-align:center"> minutes
-        <button class="startbtn" id="pr-gen" style="margin-left:12px">Split into sections →</button> <span class="ghost" id="pr-status"></span></div>
-        <div id="pr-plan"></div>
-      </div>
-
-      <!-- session -->
-      <div class="panel">
-        <button class="startbtn" id="startbtn">▶ Start session</button>
-        <span class="ptt-hint" id="topstat" style="margin-left:12px"></span>
-        <div id="scenebar"></div>
-        <div class="ptt-wrap">
-          <button class="ptt" id="ptt" disabled>HOLD<br>TO TALK</button>
-          <canvas id="wavec" width="840" height="80"></canvas>
-          <div class="ptt-hint" id="hint">start a session first</div>
-        </div>
-        <div id="echobox"></div>
-        <div class="chat" id="chat"></div>
-        <div id="reportbox"></div>
-      </div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:18px">
-      <div class="panel">
-        <h3>This turn</h3>
-        <div id="gracebox" style="display:none;color:var(--ink-2);font-size:14px">warming up — just talk 🙂</div>
-        <div id="scorebox">
-          <div class="bigscore"><span class="n" id="comp">—</span>
-            <span class="xp" id="xp"></span><span class="cx" id="cx"></span></div>
-          <button class="foldbtn" id="fold">▸ details</button>
-          <div id="dims" style="display:none">
-            <div class="dim g"><div class="row"><span>Grammar</span><b id="sg">—</b></div><div class="bar"><i id="bg"></i></div></div>
-            <div class="dim v"><div class="row"><span>Vocabulary</span><b id="sv">—</b></div><div class="bar"><i id="bv"></i></div></div>
-            <div class="dim f"><div class="row"><span>Fluency</span><b id="sf">—</b></div><div class="bar"><i id="bf"></i></div></div>
-            <div class="dim p"><div class="row"><span>Pronunciation <span class="proxy">(ASR proxy)</span></span><b id="sp">—</b></div><div class="bar"><i id="bp"></i></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" id="scenepanel" style="display:none"><h3 id="scenepanel-h">Scene</h3><div id="scenepanel-b"></div></div>
-
-      <div class="panel">
-        <h3>You</h3>
-        <div class="stat"><span>Level <span class="proxy">(estimate)</span></span><span class="lvl" id="lvl">—</span></div>
-        <div class="stat"><span>Lv (xp)</span><b id="lvxp">—</b></div>
-        <div class="stat"><span>XP</span><b id="xptotal">0</b></div>
-        <div class="stat"><span>Active cards</span><b id="ncards">0</b></div>
-        <div class="stat"><span>Turns total</span><b id="nturns">0</b></div>
-        <div class="svc" id="svc"></div>
-      </div>
-    </div>
-  </div>
+  <div id="clonetoast"></div>
+  <div id="studio-you"></div>
+  <div id="studio-target"></div>
+  <div id="studio-takes"></div>
+  <div id="newwrap" style="text-align:center"></div>
 </div>
 </div>
 
@@ -323,27 +128,16 @@ textarea { width: 100%; min-height: 90px; background: var(--page); border: 1px s
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let ST = null;                       // /api/state cache
-let sessionOn = false, mode = "free", scene = null, ivPlan = null, prPlan = null, SUGG = [];
-let polish = null;                   // 打磨循环: {ref_text, ref_words, ref_audio, pattern, attempts[]}
-let lastTurnErrors = [], gentleLog = [];
+const FILLER_RE = /^(um+|uh+|erm+|hmm+|like)$/i;
+const PX_PER_SEC = 130;              // 波形/节奏条统一时间比例 — 长短差异一眼可见
 
-/* ================= audio queue + barge-in ================= */
-const audioQ = []; let nowPlaying = null;
-function enqueueAudio(el, then){ el._then = then; audioQ.push(el); pump(); }
-function pump(){
-  if (nowPlaying || !audioQ.length) return;
-  nowPlaying = audioQ.shift();
-  const fin = () => { const t = nowPlaying && nowPlaying._then; nowPlaying = null; if (t) t(); pump(); };
-  nowPlaying.onended = nowPlaying.onerror = fin;
-  nowPlaying.play().catch(fin);      // autoplay 拒绝 → 保留手动 controls
-}
-function stopAllAudio(){ audioQ.length = 0; if (nowPlaying){ nowPlaying.pause(); nowPlaying = null; } }
+let studio = null;                   // {heard, target, ref_words, ref_audio, pattern, attempts[]}
+let busy = false;
 
-/* ================= NDJSON stream reader ================= */
-async function streamTurn(url, fd, onStage){
+/* ============ NDJSON reader ============ */
+async function streamPost(url, fd, onStage){
   const ctl = new AbortController();
-  const watchdog = setTimeout(() => ctl.abort(), 90000);
+  const watchdog = setTimeout(() => ctl.abort(), 120000);
   try {
     const resp = await fetch(url, {method: "POST", body: fd, signal: ctl.signal});
     if (!resp.ok){
@@ -371,589 +165,243 @@ async function streamTurn(url, fd, onStage){
   } finally { clearTimeout(watchdog); }
 }
 
-/* ================= state / boot ================= */
-const LANGS = ["中文","Español","日本語","한국어","Français","other"];
-const GOALS = [["interview","Job interviews"],["presentation","Presentations"],["daily","Daily conversation"],["travel","Travel"],["meetings","Meetings at work"]];
-
-async function refreshState(){
-  ST = await (await fetch("/api/state")).json();
-  $("lvl").textContent = ST.level;
-  $("lvxp").textContent = "Lv " + ST.lv.lv + " · " + ST.profile.xp + "/" + ST.lv.next_at;
-  $("xptotal").textContent = ST.profile.xp;
-  $("ncards").textContent = ST.cards_total;
-  $("nturns").textContent = ST.profile.turns_total;
-  $("rightbar").textContent = `🔥 ${ST.profile.streak}d · ${ST.profile.xp} xp · ${ST.level}`;
-  const badges = [
-    ["voice sample", ST.enrolled_local],
-    ["clone", ST.eleven_cloned ? true : (ST.eleven_key ? "key only" : false)],
-    ["judge · " + ST.judge, ST.judge !== "cli"],
-    ["sauna mcp", ST.services.sauna_mcp],
-  ];
-  if (ST.mock) badges.push(["MOCK MODE", "warn"]);
-  $("svc").innerHTML = badges.map(([n, v]) =>
-    `<span class="${v === true ? "on" : ""}">${n}${v === "key only" ? " · pending" : v === false ? " · off" : ""}</span>`).join("");
-  const gs = ST.goal_suggestion;
-  $("goalchip").innerHTML = gs ? `<span class="goalchip" onclick="pickMode('${gs.mode === 'scenario' ? 'scenario' : gs.mode}')">🎯 ${esc(gs.text)}</span>` : "";
-  renderModes();
-  return ST;
-}
-
-function renderModes(){
-  const due = ST.due_summary || {n: 0};
-  const tabs = [["free","Free talk"],["review","Quick review", due.n ? due.n : null],
-                ["scenario","Scenario"],["interview","Interview"],["presentation","Presentation"]];
-  $("modes").innerHTML = tabs.map(([k, label, n]) =>
-    `<button class="mtab ${mode === k ? "on" : ""}" ${sessionOn ? "disabled" : ""} onclick="pickMode('${k}')">${label}${n ? `<span class="n">${n} due</span>` : ""}</button>`).join("");
-}
-
-window.pickMode = function(k){
-  if (sessionOn) return;
-  mode = k;
-  renderModes();
-  $("setup-scenario").style.display = k === "scenario" ? "" : "none";
-  $("setup-interview").style.display = k === "interview" ? "" : "none";
-  $("setup-present").style.display = k === "presentation" ? "" : "none";
-  $("startbtn").style.display = (k === "scenario" || k === "interview" || k === "presentation") ? "none" : "";
-  if (k === "scenario") loadSuggestions(false);
-  if (k === "interview") loadFactChips();
-  if (k === "review" && !(ST.due_summary || {}).n){ $("hint").textContent = "no cards due — free talk instead?"; }
-};
-
-/* ================= onboarding ================= */
-function boot(){
-  if (!ST.onboarded){ showOb(1); return; }
-  if (!ST.enrolled_local){ showOb(2); return; }
-  $("ob").style.display = "none"; $("main").style.display = "";
-}
-function showOb(step){
-  $("ob").style.display = ""; $("main").style.display = "none";
-  ["ob1","ob2","ob3"].forEach((x, i) => $(x).style.display = (i + 1 === step) ? "" : "none");
-  if (step === 1){
-    $("ob-lang").innerHTML = LANGS.map(l => `<span class="chip" data-v="${l}">${l}</span>`).join("");
-    $("ob-goal").innerHTML = GOALS.map(([k, l]) => `<span class="chip" data-v="${k}">${l}</span>`).join("");
-    [...$("ob-lang").children].forEach(c => c.onclick = () => { [...$("ob-lang").children].forEach(x => x.classList.remove("on")); c.classList.add("on"); });
-    [...$("ob-goal").children].forEach(c => c.onclick = () => {
-      if (c.classList.contains("on")) c.classList.remove("on");
-      else if ($("ob-goal").querySelectorAll(".on").length < 2) c.classList.add("on");
-    });
-  }
-}
-$("ob1-next").onclick = async () => {
-  const name = $("ob-name").value.trim() || "friend";
-  const lang = ($("ob-lang").querySelector(".on") || {}).dataset?.v || "";
-  const goals = [...$("ob-goal").querySelectorAll(".on")].map(c => c.dataset.v);
-  await fetch("/api/setup", {method: "POST", headers: {"Content-Type": "application/json"},
-                             body: JSON.stringify({name, native_lang: lang, goals})});
-  await refreshState();
-  showOb(ST.enrolled_local ? 3 : 2);
-  if (ST.enrolled_local) runPayoff();
-};
-
-let obMr = null, obChunks = [], obT0 = 0, obTimer = null;
-$("ob-rec").onclick = async () => {
-  if (obMr && obMr.state === "recording"){ obMr.stop(); return; }
-  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-  obChunks = []; obMr = new MediaRecorder(stream);
-  obMr.ondataavailable = e => obChunks.push(e.data);
-  obT0 = Date.now();
-  obTimer = setInterval(() => {
-    const s = Math.floor((Date.now() - obT0) / 1000);
-    $("ob-rec-hint").textContent = `recording ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")} — tap again when done`;
-    if (s >= 90) obMr.stop();
-  }, 500);
-  obMr.onstop = async () => {
-    clearInterval(obTimer);
-    stream.getTracks().forEach(t => t.stop());
-    $("ob-rec").classList.remove("rec");
-    const dur = (Date.now() - obT0) / 1000;
-    $("ob2-status").innerHTML = '<span class="pulse">listening back…</span>';
-    const fd = new FormData();
-    fd.append("file", new Blob(obChunks, {type: obMr.mimeType}), "enroll.webm");
-    const r = await fetch("/api/enroll", {method: "POST", body: fd});
-    const j = await r.json();
-    if (!r.ok){ $("ob2-status").textContent = j.error || "couldn't hear you — one more take?"; return; }
-    if (dur < 40){
-      $("ob2-status").innerHTML = `That was ${Math.round(dur)}s — a bit short for a good twin. One more take?
-        <button class="ghostlink" id="ob2-keep">Use it anyway</button>`;
-      $("ob2-keep").onclick = () => { showOb(3); runPayoff(); };
-      return;
+/* ============ 波形图: 真实幅度包络, 统一 px/s — "音频图的区别" ============ */
+let decodeCtx = null;
+async function drawWave(canvas, src, color){
+  try {
+    decodeCtx = decodeCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const ab = src instanceof Blob ? await src.arrayBuffer() : await (await fetch(src)).arrayBuffer();
+    const buf = await decodeCtx.decodeAudioData(ab);
+    const data = buf.getChannelData(0);
+    const w = Math.max(80, Math.round(buf.duration * PX_PER_SEC));
+    canvas.width = w; canvas.height = 46;
+    canvas.style.width = w + "px";
+    const ctx = canvas.getContext("2d");
+    const step = Math.max(1, Math.floor(data.length / w));
+    ctx.fillStyle = color;
+    for (let x = 0; x < w; x++){
+      let peak = 0;
+      const s0 = x * step, s1 = Math.min(s0 + step, data.length);
+      for (let i = s0; i < s1; i += 8){ const v = Math.abs(data[i]); if (v > peak) peak = v; }
+      const h = Math.max(1.5, peak * 44);
+      ctx.fillRect(x, (46 - h) / 2, 1, h);
     }
-    showOb(3); runPayoff();
-  };
-  obMr.start();
-  $("ob-rec").classList.add("rec");
-};
-
-async function runPayoff(){
-  await refreshState();
-  if (ST.eleven_key && !ST.eleven_cloned){
-    const r = await fetch("/api/enroll/eleven", {method: "POST"});
-    if (!r.ok){
-      const j = await r.json().catch(() => ({}));
-      if (j.reason === "tier")
-        $("ob3-body").innerHTML = `<span class="ghost">ElevenLabs free tier can't clone voices — upgrade to Starter
-          or grab a hackathon key. Meanwhile, here's the local fallback:</span>`;
-    }
-  }
-  try {
-    const r = await fetch("/api/voice/payoff", {method: "POST"});
-    const j = await r.json();
-    const a = document.createElement("audio"); a.controls = true; a.src = j.audio;
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `<div style="font-size:17px;line-height:1.6;margin-bottom:8px">“${j.text}”</div>`;
-    wrap.appendChild(a);
-    wrap.insertAdjacentHTML("beforeend", `<div class="badge">${j.cloned ? "your cloned voice" : "fallback voice — clone offline"} · ${j.engine}</div>`);
-    $("ob3-body").innerHTML = ""; $("ob3-body").appendChild(wrap);
-    enqueueAudio(a);
-  } catch { $("ob3-body").innerHTML = '<span class="ghost">voice engine offline — you can test it later on the Me page.</span>'; }
-}
-$("ob3-go").onclick = () => { $("ob").style.display = "none"; $("main").style.display = ""; };
-$("ob3-tutor").onclick = async () => {
-  await fetch("/api/me/prefs", {method: "POST", headers: {"Content-Type": "application/json"},
-                                body: JSON.stringify({fix_voice: "tutor"})});
-  $("ob").style.display = "none"; $("main").style.display = "";
-};
-
-/* ================= scenario setup ================= */
-async function loadSuggestions(regen){
-  $("sugg").innerHTML = '<div class="ghost pulse">Kai is sketching scenes from your life…</div>';
-  try {
-    const r = await fetch("/api/scenes/suggest" + (regen ? "?regen=1" : ""));
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error);
-    SUGG = j.suggestions || [];
-    $("sugg").innerHTML = SUGG.map((s, i) => `
-      <div class="sc ${s.wildcard ? "wild" : ""}" onclick="startScene(${i})">
-        <div class="t">${s.wildcard ? "🎲 " : ""}${esc(s.title)}</div>
-        <div class="hook">${esc(s.hook || "")}</div>
-        <div class="d">Kai plays: ${esc(s.kai_role)}. You: ${esc(s.learner_role)}.<br>Goal: ${esc(s.objective)}</div>
-        <div class="pats">${(s.target_patterns || []).map(p => `<span class="pat">${esc(p)}</span>`).join("")}</div>
-      </div>`).join("");
-  } catch (e) { $("sugg").innerHTML = `<div class="ghost">couldn't generate scenes (${esc(e.message)}) — try ↻</div>`; }
-}
-$("sc-regen").onclick = () => loadSuggestions(true);
-window.startScene = async idx => {
-  // 直接把客户端渲染的 stub 发过去 — 避免缓存 key 变化导致"点 A 开出 B"
-  const r = await fetch("/api/scene/start", {method: "POST", headers: {"Content-Type": "application/json"},
-                                             body: JSON.stringify(SUGG[idx] ? {scene: SUGG[idx]} : {suggestion_idx: idx})});
-  beginSession(await r.json());
-};
-
-/* ================= interview setup ================= */
-async function loadFactChips(){
-  const m = await (await fetch("/api/me")).json();
-  $("iv-facts").innerHTML = (m.facts || []).filter(f => f.use).map(f =>
-    `<span class="chip" data-v="${esc(f.text)}">${esc(f.text)}</span>`).join("") ||
-    '<span class="ghost">no facts yet — talk to Kai first, or paste a JD above</span>';
-  [...$("iv-facts").children].forEach(c => { if (c.classList.contains("chip")) c.onclick = () => c.classList.toggle("on"); });
-}
-$("iv-gen").onclick = async () => {
-  $("iv-status").textContent = "building your mock…"; $("iv-gen").disabled = true;
-  const facts = [...$("iv-facts").querySelectorAll(".on")].map(c => c.dataset.v);
-  try {
-    const r = await fetch("/api/scene/interview/intake", {method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({jd_text: $("jd").value, fact_ids: facts, role_hint: $("iv-role").value})});
-    ivPlan = await r.json();
-    if (!r.ok) throw new Error(ivPlan.error);
-    $("iv-plan").innerHTML = `<div style="margin-top:12px;font-weight:650">${esc(ivPlan.role)} @ ${esc(ivPlan.company)} · ${esc(ivPlan.interviewer)}</div>` +
-      ivPlan.questions.map(q => `<div class="qrow"><span class="k">${esc(q.kind)}${q.wants ? " · " + esc(q.wants) : ""}</span>${esc(q.q)}</div>`).join("") +
-      `<div style="margin-top:12px"><button class="startbtn" onclick="startPlan('${ivPlan.id}')">🎙 Start mock interview</button></div>`;
-    $("iv-status").textContent = "";
-  } catch (e) { $("iv-status").textContent = "intake failed: " + e.message; }
-  $("iv-gen").disabled = false;
-};
-window.startPlan = async pid => {
-  const r = await fetch("/api/scene/start", {method: "POST", headers: {"Content-Type": "application/json"},
-                                             body: JSON.stringify({plan_id: pid})});
-  beginSession(await r.json());
-};
-
-/* ================= presentation setup ================= */
-$("pr-gen").onclick = async () => {
-  $("pr-status").textContent = "splitting…"; $("pr-gen").disabled = true;
-  try {
-    const r = await fetch("/api/scene/present/intake", {method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({outline_text: $("pr-outline").value, target_minutes: parseFloat($("pr-min").value) || 3})});
-    prPlan = await r.json();
-    if (!r.ok) throw new Error(prPlan.error);
-    $("pr-plan").innerHTML = `<div style="margin-top:12px;font-weight:650">${esc(prPlan.title)} · for ${esc(prPlan.audience)}</div>` +
-      prPlan.sections.map(s => `<div class="qrow"><span class="k">${s.target_sec}s</span>${esc(s.title)}</div>`).join("") +
-      `<div style="margin-top:12px"><button class="startbtn" onclick="startPlan('${prPlan.id}')">🎤 Start rehearsal</button></div>`;
-    $("pr-status").textContent = "";
-  } catch (e) { $("pr-status").textContent = "intake failed: " + e.message; }
-  $("pr-gen").disabled = false;
-};
-
-/* ================= session ================= */
-function beginSession(r){
-  sessionOn = true; scene = r.scene || null; polish = null;
-  lastTurnErrors = []; gentleLog = [];
-  $("chat").innerHTML = ""; $("reportbox").innerHTML = ""; $("echobox").innerHTML = "";
-  ["setup-scenario","setup-interview","setup-present"].forEach(x => $(x).style.display = "none");
-  $("startbtn").style.display = ""; $("startbtn").className = "startbtn end"; $("startbtn").textContent = "■ End session";
-  $("ptt").disabled = false;
-  $("hint").textContent = "hold — speak English — release";
-  renderModes();
-  if (r.drill_n) $("scenebar").innerHTML = `<div class="drill">⚡ warm-up review · ${r.drill_n} cards fading — quick answers, still just conversation</div>`;
-  else $("scenebar").innerHTML = "";
-  renderScenePanel(null);
-  const b = bubble(`<div class="who">kai${scene ? " · in character" : ""}</div>${esc(r.reply)}`, "tutor");
-  if (r.audio){
-    const a = document.createElement("audio"); a.controls = true; a.src = r.audio;
-    b.appendChild(a); b.insertAdjacentHTML("beforeend", `<div class="badge">${r.engine}</div>`);
-    enqueueAudio(a);
+    ctx.fillStyle = "rgba(255,255,255,.12)";                       // 秒刻度线
+    for (let s = 1; s < buf.duration; s++) ctx.fillRect(Math.round(s * PX_PER_SEC), 0, 1, 46);
+  } catch (e) {
+    canvas.replaceWith(Object.assign(document.createElement("div"),
+      {className: "ghost", textContent: "waveform unavailable"}));
   }
 }
 
-$("startbtn").onclick = async () => {
-  if (sessionOn){ endSession(); return; }
-  $("startbtn").disabled = true; $("startbtn").textContent = "waking Kai…";
-  try {
-    const r = await fetch("/api/session/start", {method: "POST", headers: {"Content-Type": "application/json"},
-                                                 body: JSON.stringify({mode: mode === "review" ? "review" : "free"})});
-    beginSession(await r.json());
-  } finally { $("startbtn").disabled = false; }
-};
-
-async function endSession(){
-  $("startbtn").disabled = true;
-  const r = await (await fetch("/api/session/end", {method: "POST"})).json();
-  sessionOn = false; $("ptt").disabled = true; $("ptt").className = "ptt"; $("ptt").innerHTML = "HOLD<br>TO TALK";
-  polish = null; $("echobox").innerHTML = ""; $("scenebar").innerHTML = "";
-  $("startbtn").disabled = false; $("startbtn").className = "startbtn"; $("startbtn").textContent = "▶ Start session";
-  $("hint").textContent = "session saved to memory";
-  renderReport(r);
-  renderModes(); refreshState();
-}
-
-function renderReport(r){
-  let html = `<div class="report"><b>Session report</b> — ${r.turns} turns · avg ${r.avg ?? "—"} · +${r.xp_gained} xp
-    · ${r.cards_created} new cards · ${r.cards_advanced} leveled up<br>`;
-  const sr = r.scene_report;
-  if (sr && sr.mode === "interview"){
-    html += `<b>${esc(sr.role)} @ ${esc(sr.company)}</b> · language ${sr.overall?.language ?? "—"} · structure ${sr.overall?.structure ?? "—"}
-      <div class="ghost">coaching feedback, not a hiring assessment</div>
-      <table><tr><th>question</th><th>lang</th><th>structure</th><th>delivery</th><th></th></tr>` +
-      (sr.per_question || []).map(q => `<tr><td>${esc(q.q)}</td><td>${q.lang ?? "—"}</td>
-        <td>${q.structure ?? "—"}${q.star && q.star.s !== null && q.star.s !== undefined ? " · " + ["s","t","a","r"].map(k => q.star[k] ? k.toUpperCase() : "·").join("") : ""}</td>
-        <td>${q.delivery ? (q.delivery.wpm ?? "—") + "wpm · " + (q.delivery.fillers ?? 0) + " fillers" : "—"}</td>
-        <td>${q.polished_audio ? `<audio controls src="${q.polished_audio}" style="height:24px;width:120px"></audio>` : ""}</td></tr>`).join("") + "</table>";
-    if (sr.coach_verdict) html += `<div style="margin-top:8px">${esc(sr.coach_verdict)}</div>`;
-    if (sr.top_fixes?.length) html += `<div style="margin-top:4px">🎯 ${esc(sr.top_fixes.join(" · "))}</div>`;
-  } else if (sr && sr.mode === "presentation"){
-    html += `<b>${esc(sr.title)}</b> · total ${sr.total?.actual_sec}s / ${sr.total?.target_sec}s target
-      <table><tr><th>section</th><th>time</th><th>wpm</th><th>clarity</th><th></th></tr>` +
-      (sr.sections || []).map(s => `<tr><td>${esc(s.title)}</td><td>${s.actual_sec}s/${s.target_sec}s</td>
-        <td>${s.wpm ?? "—"}</td><td>${s.clarity ?? "—"}</td>
-        <td>${s.polished_audio ? `<audio controls src="${s.polished_audio}" style="height:24px;width:120px"></audio>` : ""}</td></tr>`).join("") + "</table>";
-    if (sr.qa?.asked) html += `Q&A: ${sr.qa.asked} questions · avg ${sr.qa.avg}<br>`;
-    if (sr.vs_last_run) html += `vs last run: ${sr.vs_last_run.total_sec > 0 ? "+" : ""}${sr.vs_last_run.total_sec}s · ${sr.vs_last_run.fillers > 0 ? "+" : ""}${sr.vs_last_run.fillers} fillers<br>`;
-    if (sr.coach_verdict) html += `<div style="margin-top:8px">${esc(sr.coach_verdict)}</div>`;
-    if (sr.top_fixes?.length) html += `<div style="margin-top:4px">🎯 ${esc(sr.top_fixes.join(" · "))}</div>`;
-  } else if (sr && sr.mode === "scenario"){
-    html += `scene “${esc(sr.title)}” — beats ${sr.beats} · ${sr.outcome}<br>`;
-  }
-  if (r.best_moment) html += `🏆 best line: “${esc(r.best_moment)}”<br>`;
-  if (ST.profile.gentle_mode && gentleLog.length){
-    const top = {}; gentleLog.forEach(e => top[e.pattern] = (top[e.pattern] || 0) + 1);
-    const t3 = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 3);
-    html += `<div style="margin-top:6px"><b>What to polish</b> · ${t3.map(([p, n]) => `${p} ×${n}`).join(" · ")}</div>`;
-  }
-  html += r.summary ? `<div class="ghost" style="margin-top:6px">${esc(r.summary)}</div>` : "";
-  html += `</div>`;
-  $("reportbox").innerHTML = html;
-  if (r.sendoff_audio){
-    const a = document.createElement("audio"); a.src = r.sendoff_audio; enqueueAudio(a);
-    $("reportbox").insertAdjacentHTML("beforeend", `<div class="ghost" style="margin-top:6px">🗣 ${esc(r.sendoff || "")}</div>`);
-  }
-}
-
-/* ================= turn rendering ================= */
-function bubble(html, cls){
-  const b = document.createElement("div");
-  b.className = "bub " + cls; b.innerHTML = html;
-  $("chat").prepend(b); return b;
-}
-
-/* ============ 声学/文本节奏可视化 ============ */
-const FILLER_RE = /^(um+|uh+|erm+|hmm+|like)$/i;
-const FUZZY_LP = -0.35;          // Scribe 词级 logprob 低于此 → 说得含糊 (ASR proxy)
-
-function rhythmStrip(words, {legend = true} = {}){
-  // words: [{text,start,end,logprob}] → 时间轴: 词块(按实际时长定宽) + 停顿块 + 填充词/含糊词标色
+/* ============ 节奏条 (px 与波形同比例, 上下可对齐比较) ============ */
+function rhythmStrip(words, {ref = false} = {}){
   if (!words || words.length < 2) return "";
   const t0 = words[0].start, t1 = words[words.length - 1].end;
-  const total = Math.max(t1 - t0, 0.5);
-  const px = t => ((t - t0) / total * 100).toFixed(2) + "%";
-  const wd = (a, b) => Math.max((b - a) / total * 100, 0.8).toFixed(2) + "%";
-  let h = "", nFuzzy = 0, nFill = 0, nPause = 0;
+  const total = Math.max(t1 - t0, 0.4);
+  const W = Math.max(80, Math.round(total * PX_PER_SEC));
+  const px = t => ((t - t0) / total * W);
+  let h = "";
   for (let i = 0; i < words.length; i++){
     const w = words[i];
     const fill = FILLER_RE.test(w.text);
-    const fz = !fill && w.logprob != null && w.logprob < FUZZY_LP;
-    if (fill) nFill++; if (fz) nFuzzy++;
+    const fz = !fill && w.logprob != null && w.logprob < -0.35;
     const tip = `${esc(w.text)} · ${((w.end - w.start) * 1000).toFixed(0)}ms` +
                 (w.logprob != null ? ` · conf ${w.logprob.toFixed(2)} (ASR proxy)` : "");
-    h += `<span class="rw${fz ? " fz" : ""}${fill ? " fill" : ""}" style="left:${px(w.start)};width:${wd(w.start, w.end)}" title="${tip}">${esc(w.text)}</span>`;
+    h += `<span class="rw${ref ? " ref" : ""}${fz ? " fz" : ""}${fill ? " fill" : ""}" style="left:${px(w.start).toFixed(1)}px;width:${Math.max(6, px(w.end) - px(w.start)).toFixed(1)}px" title="${tip}">${esc(w.text)}</span>`;
     if (i < words.length - 1){
       const gap = words[i + 1].start - w.end;
-      if (gap > 0.5){
-        nPause++;
-        h += `<span class="rp" style="left:${px(w.end)};width:${wd(w.end, words[i + 1].start)}" title="pause ${gap.toFixed(1)}s">${gap.toFixed(1)}s</span>`;
-      }
+      if (gap > 0.5) h += `<span class="rp" style="left:${px(w.end).toFixed(1)}px;width:${Math.max(8, px(words[i + 1].start) - px(w.end)).toFixed(1)}px" title="pause ${gap.toFixed(1)}s">${gap.toFixed(1)}s</span>`;
     }
   }
-  let out = `<div class="rstrip">${h}</div>`;
-  if (legend){
-    const bits = [`<span>${total.toFixed(1)}s</span>`];
-    if (nPause) bits.push(`<span><i style="background:rgba(201,133,0,.5)"></i>${nPause} pause${nPause > 1 ? "s" : ""}</span>`);
-    if (nFill) bits.push(`<span><i style="background:rgba(144,133,233,.5)"></i>${nFill} filler${nFill > 1 ? "s" : ""}</span>`);
-    if (nFuzzy) bits.push(`<span><i style="background:rgba(208,59,59,.5)"></i>${nFuzzy} fuzzy <span style="opacity:.7">(ASR proxy)</span></span>`);
-    out += `<div class="rlegend">${bits.join("")}</div>`;
-  }
-  return out;
+  return `<div class="wavebox"><div class="rstrip" style="width:${W}px">${h}</div></div>`;
 }
 
 function paceGauge(wps){
-  // 语速仪表: 1.8–3.4 wps 自然带高亮, 指针 = 本轮实测; 轴范围 0.8–4.8
   if (wps == null) return "";
   const LO = 0.8, HI = 4.8;
   const pc = v => Math.max(0, Math.min(100, (v - LO) / (HI - LO) * 100));
   const label = wps < 1.8 ? "unhurried" : wps <= 3.4 ? "natural band ✓" : "rushed";
-  return `<div class="pace"><span class="lab">pace</span>
+  return `<div class="pace"><span class="plab">pace</span>
     <div class="pacebar"><span class="band" style="left:${pc(1.8)}%;width:${(pc(3.4) - pc(1.8)).toFixed(1)}%"></span>
     <span class="needle" style="left:${pc(wps).toFixed(1)}%"></span></div>
     <span class="val">${wps.toFixed(1)} w/s · ${label}</span></div>`;
 }
-function fmtPat(p){ return (p || "").replace(/-/g, " "); }
 
-/* ============ 打磨循环 (核心交互): 说→纠→反复模仿→图谱对比→评分 ============ */
-let lastFocusPattern = "";
-function openPolish(refText, refWords, refAudio){
-  polish = {ref_text: refText, ref_words: refWords || [], ref_audio: refAudio,
-            pattern: lastFocusPattern || "", attempts: []};
-  renderPolish();
-  $("ptt").classList.add("echo"); $("ptt").innerHTML = "IMITATE";
-  $("hint").textContent = "that's you, fluent — hold and copy it. as many takes as you want.";
+/* ============ studio 渲染 ============ */
+function playBtn(src, label){
+  const b = document.createElement("button");
+  b.className = "play"; b.textContent = "▶ " + label;
+  b.onclick = () => { const a = new Audio(src); a.play().catch(() => {}); };
+  return b;
 }
-function closePolish(){
-  polish = null;
-  $("echobox").innerHTML = "";
-  $("ptt").classList.remove("echo"); $("ptt").innerHTML = "HOLD<br>TO TALK";
-  $("hint").textContent = "hold — speak English — release";
+
+function renderYou(j, blob){
+  $("studio-you").innerHTML = `<div class="pcard you"><div class="lab">your try</div>
+    <div class="sent">“${esc(j.heard)}”</div>
+    <div class="wavebox"><canvas id="you-wave"></canvas></div>
+    ${rhythmStrip(j.words)}
+    ${j.fl_meta && j.fl_meta.wps != null ? paceGauge(j.fl_meta.wps) : ""}
+    <div id="you-extra"></div>
+    <div class="badge">${esc(j.stt_engine)}</div></div>`;
+  const sent = $("studio-you").querySelector(".sent");
+  sent.after(playBtn(blob ? URL.createObjectURL(blob) : j.audio, "your audio"));
+  drawWave($("you-wave"), blob || j.audio, "rgba(57,135,229,.9)");
 }
-function renderPolish(){
-  if (!polish) return;
-  const p = polish;
-  const atts = p.attempts.map((a, i) => {
-    const prev = i > 0 ? p.attempts[i - 1].composite : null;
+
+function renderTargetCard(targetText, errors, note, changed){
+  const chips = (errors || []).map(e =>
+    `<span class="errchip${e.type === "habit" ? " habit" : ""}">${esc(e.type)} · “${esc(e.span)}” → <b>${esc(e.correction)}</b></span>`).join("");
+  const extra = $("you-extra");
+  if (extra) extra.innerHTML =
+    (chips ? `<div class="errchips">${chips}</div>` : "") +
+    (note ? `<div class="note">💡 ${esc(note)}</div>` : "");
+  $("studio-target").innerHTML = `<div class="pcard target">
+    <div class="lab">the fluent you${changed ? "" : " · your sentence, native rhythm"}</div>
+    <div class="sent">“${esc(targetText)}”</div>
+    <div id="ref-media"><span class="ghost pulse">cloning the sound of you being fluent…</span></div></div>`;
+}
+
+function renderRef(j){
+  studio.ref_audio = j.audio; studio.ref_words = j.words || []; studio.pattern = j.pattern || "";
+  const m = $("ref-media");
+  m.innerHTML = `<div class="wavebox"><canvas id="ref-wave"></canvas></div>
+    ${rhythmStrip(studio.ref_words, {ref: true})}
+    <div class="badge">${j.own_voice ? "your cloned voice · " : "fallback voice (clone pending) · "}${esc(j.engine)}</div>`;
+  m.prepend(playBtn(j.audio, "the fluent you"));
+  drawWave($("ref-wave"), j.audio, "rgba(25,158,112,.95)");
+  new Audio(j.audio).play().catch(() => {});
+  $("ptt").classList.add("imitate");
+  $("ptt").innerHTML = "IMITATE";
+  $("hint").textContent = "now copy it — hold, say it, release. as many takes as you want.";
+  $("newwrap").innerHTML = `<button class="newbtn" id="newbtn">🆕 practice a new sentence</button>`;
+  $("newbtn").onclick = resetStudio;
+}
+
+function renderTakes(){
+  const takes = studio.attempts;
+  if (!takes.length){ $("studio-takes").innerHTML = ""; return; }
+  const rows = takes.map((a, i) => {
+    const prev = i > 0 ? takes[i - 1].composite : null;
     const d = prev == null ? "" : (a.composite - prev >= 0 ? `<span class="delta up">▲${a.composite - prev}</span>`
                                                           : `<span class="delta dn">▼${prev - a.composite}</span>`);
     const dims = [["said it", a.dims.match], ["pron*", a.dims.pron], ["rhythm*", a.dims.rhythm], ["smooth", a.dims.smooth]]
       .filter(x => x[1] != null).map(x => `<span class="dimchip">${x[0]} ${x[1]}</span>`).join("");
     return `<div class="attrow"><div class="head"><span class="n">take ${i + 1}</span>
       <span class="score">${a.composite}</span>${d}<span class="dims">${dims}</span></div>
-      ${rhythmStrip(a.words, {legend: false})}
-      ${a.fast_tracked ? '<div class="ghost" style="margin-top:4px;color:var(--aqua)">card fast-tracked ⚡</div>' : ""}</div>`;
+      <div class="wavebox"><canvas id="att-wave-${i}"></canvas></div>
+      ${rhythmStrip(a.words)}
+      ${a.fast_tracked ? '<div class="ghost" style="color:var(--aqua);margin-top:4px">mistake card fast-tracked ⚡</div>' : ""}</div>`;
   }).join("");
-  const trend = p.attempts.length > 1
-    ? `<div class="trend">${p.attempts.map(a => `<i style="height:${Math.max(8, a.composite * 0.34)}px" title="${a.composite}"></i>`).join("")}</div>` : "";
-  $("echobox").innerHTML = `<div class="polishbox">
-    <div class="lab">polish — say it like the fluent you</div>
-    <div class="refrow"><button class="play" id="refplay">▶ reference</button>“${esc(p.ref_text)}”</div>
-    ${p.ref_words.length > 1 ? `<div class="refcap">the fluent you</div>${rhythmStrip(p.ref_words, {legend: false})}` : ""}
-    ${p.attempts.length ? `<div class="refcap">your takes</div>` : ""}${atts}${trend}
-    <div class="polishactions">
-      <span class="ghost">hold the mic button for another take</span>
-      <button class="ghostlink" id="polishdone" style="margin-left:auto">✓ done — keep talking</button>
-    </div>
-    <div class="ghost" style="margin-top:8px">* pron is ASR-confidence proxy · rhythm is a rough timing match — direction, not lab precision</div>
-  </div>`;
-  $("refplay").onclick = () => { const a = new Audio(p.ref_audio); stopAllAudio(); a.play().catch(() => {}); };
-  $("polishdone").onclick = closePolish;
+  const trend = takes.length > 1
+    ? `<div class="trend">${takes.map(a => `<i style="height:${Math.max(8, a.composite * 0.38)}px" title="${a.composite}"></i>`).join("")}</div>` : "";
+  $("studio-takes").innerHTML = `<div class="pcard"><div class="lab" style="color:var(--ink-3)">your takes — vs the fluent you</div>
+    ${rows}${trend}
+    <div class="ghost" style="margin-top:10px">* pron = ASR-confidence proxy · rhythm = rough timing match — direction, not lab precision</div></div>`;
+  takes.forEach((a, i) => {
+    const cv = $(`att-wave-${i}`);
+    if (cv) drawWave(cv, a._blob || a.audio, "rgba(57,135,229,.9)");
+  });
 }
-async function postAttempt(blob){
-  const p = polish;
-  $("hint").textContent = "listening to your take…";
+
+function resetStudio(){
+  studio = null;
+  ["studio-you", "studio-target", "studio-takes", "clonetoast"].forEach(x => $(x).innerHTML = "");
+  $("newwrap").innerHTML = "";
+  $("ptt").classList.remove("imitate");
+  $("ptt").innerHTML = "HOLD<br>&amp; SPEAK";
+  $("hint").textContent = "hold — say the sentence you want to practice — release";
+}
+
+/* ============ 说 → 纠 → 克隆参考 ============ */
+async function sendSay(blob){
+  busy = true;
+  studio = {attempts: []};
+  $("studio-you").innerHTML = `<div class="pcard you"><div class="lab">your try</div><span class="dots"></span></div>`;
+  $("studio-target").innerHTML = ""; $("studio-takes").innerHTML = ""; $("newwrap").innerHTML = "";
   const fd = new FormData();
-  fd.append("file", blob, "att.webm");
-  fd.append("ref_text", p.ref_text);
-  fd.append("ref_words", JSON.stringify(p.ref_words));
-  fd.append("pattern", p.pattern || "");
-  fd.append("attempt", String(p.attempts.length + 1));
-  const r = await fetch("/api/polish/attempt", {method: "POST", body: fd});
-  const j = await r.json();
-  if (!r.ok){ $("hint").textContent = j.error || "couldn't hear that — one more?"; return; }
-  p.attempts.push(j);
-  renderPolish();
-  $("hint").textContent = j.passed ? "nice — again for rhythm, or ✓ done"
-                                   : "missing words — listen once more, then again";
-}
-
-function scorePanel(sc, grace){
-  $("gracebox").style.display = grace ? "" : "none";
-  $("scorebox").style.display = grace ? "none" : "";
-  if (!sc || grace) return;
-  const d = sc.dims || {};
-  const put = (k, sid, bid) => { const v = d[k];
-    $(sid).textContent = v == null ? "n/a" : v; $(bid).style.width = (v == null ? 0 : v) + "%"; };
-  put("grammar", "sg", "bg"); put("vocab", "sv", "bv"); put("fluency", "sf", "bf"); put("pron", "sp", "bp");
-  $("comp").textContent = sc.composite == null ? "—" : sc.composite;
-  $("xp").textContent = sc.xp ? `+${sc.xp} xp` : "";
-  $("cx").textContent = sc.complexity ? `ambition ×${sc.complexity}` : "";
-}
-$("fold").onclick = () => {
-  const open = $("dims").style.display !== "none";
-  $("dims").style.display = open ? "none" : "";
-  $("fold").textContent = open ? "▸ details" : "▾ details";
-};
-
-function renderScenePanel(s){
-  if (!scene){ $("scenepanel").style.display = "none"; $("scenebar").querySelector?.(".beatstrip")?.remove(); return; }
-  $("scenepanel").style.display = "";
-  const m = scene.mode || mode;
-  if (m === "scenario" || (m === "presentation" && s && s.phase === "qa")){
-    $("scenepanel-h").textContent = "Scene · " + (scene.title || "");
-    const beats = (s && s.beats) || scene.beats || [];
-    const cur = beats.findIndex(b => !b.done);
-    $("scenepanel-b").innerHTML = `<div class="ghost" style="margin-bottom:8px">${esc(scene.objective || "")}</div>` +
-      `<div class="beatstrip">` + beats.map((b, i) =>
-        `<span class="beat ${b.done ? "done" : i === cur ? "cur" : ""}">${b.done ? "✓ " : ""}${esc(b.goal)}</span>`).join("") + `</div>` +
-      ((s && s.scene_state === "wrapup") ? '<div class="drill">scene wrapping up — end session for the report</div>' : "");
-  } else if (m === "interview"){
-    $("scenepanel-h").textContent = `Interview · Q${(s ? s.cursor : 0) + 1}/${(s && s.n) || (scene.questions || []).length}`;
-    const st = s && s.structure;
-    const star = st && st.s !== null && st.s !== undefined ?
-      `<div class="star">${["s","t","a","r"].map(k => `<span class="${st[k] === true ? "ok" : st[k] === false ? "miss" : ""}">${k.toUpperCase()}</span>`).join("")}</div>` : "";
-    $("scenepanel-b").innerHTML = `${star}${st ? `<div class="ghost">${st.note || ""} · structure ${st.score ?? "—"}</div>` : '<div class="ghost">answer to see STAR + delivery feedback</div>'}
-      <div style="margin-top:8px"><button class="ghostlink" onclick="sceneNext()">skip to next question →</button></div>`;
-  } else if (m === "presentation"){
-    const n = (s && s.n) || (scene.sections || []).length;
-    const cur = s ? s.cursor : 0;
-    $("scenepanel-h").textContent = `Section ${Math.min(cur + 1, n)}/${n}`;
-    let tim = "";
-    if (s && s.timing && s.timing.target_sec){
-      const t = s.timing, ratio = Math.min(t.actual_sec / t.target_sec, 2);
-      const col = ratio <= 1.1 ? "var(--good)" : ratio <= 1.25 ? "var(--yellow)" : "var(--critical)";
-      tim = `<div class="ghost">last section: ${t.actual_sec}s / ${t.target_sec}s target · ${t.wpm ?? "—"} wpm</div>
-        <div class="tbar"><i style="width:${Math.min(ratio * 50, 100)}%;background:${col}"></i></div>`;
-    }
-    $("scenepanel-b").innerHTML = tim +
-      `<div style="margin-top:6px">${(scene.sections || []).map((x, i) =>
-        `<div class="qrow" style="${i === cur ? "color:var(--ink)" : ""}"><span class="k">${x.target_sec}s</span>${esc(x.title)}</div>`).join("")}</div>
-      <div style="margin-top:8px"><button class="ghostlink" onclick="sceneNext()">next section →</button></div>`;
-  }
-}
-window.sceneNext = async () => {
-  const r = await fetch("/api/scene/next", {method: "POST"});
-  const j = await r.json();
-  if (!r.ok) return;
-  const b = bubble(`<div class="who">kai</div>${esc(j.reply)}`, "tutor");
-  if (j.audio){ const a = document.createElement("audio"); a.controls = true; a.src = j.audio; b.appendChild(a); enqueueAudio(a); }
-  renderScenePanel({cursor: j.cursor, phase: j.phase, n: null});
-};
-
-/* ================= the turn ================= */
-let lastWords = [];                 // 最近一轮的词级时间轴 (echo 对比用)
-function handleStages(youBub){
-  let kaiBub = null, fixMeta = null;
-  return j => { switch (j.stage){
+  fd.append("file", blob, "say.webm");
+  await streamPost("/api/practice/say", fd, j => { switch (j.stage){
     case "stt":
-      lastWords = j.words || [];
-      youBub.innerHTML = `<div class="who">you · ${esc(j.stt_engine)}</div>${esc(j.heard)}` +
-        rhythmStrip(lastWords);      // 判卷没回来, 节奏条先画 — 声学反馈零等待
-      kaiBub = bubble(`<div class="who">kai</div><span class="dots"></span>`, "tutor");
-      $("hint").textContent = "Kai is thinking…";
+      studio.heard = j.heard;
+      renderYou(j, blob);
+      $("hint").textContent = "finding the fluent version…";
       break;
-    case "judge": {
-      const grace = j.grace;
-      lastTurnErrors = j.errors || [];
-      if (ST.profile.gentle_mode) (j.errors || []).forEach(e => gentleLog.push({pattern: e.pattern}));
-      const showFix = !ST.profile.gentle_mode;          // recast 文本+自声音频: 宽限期也给 (产品本体)
-      const showCorr = !grace && !ST.profile.gentle_mode; // 错误标签/含糊词: 宽限期先不吓人
-      let extra = "";
-      if (showCorr && j.errors && j.errors.length){
-        const focus = j.errors.find(e => e.pattern === j.focus_pattern) || j.errors[0];
-        const rest = j.errors.length - 1;
-        extra += `<div class="errchips"><span class="errchip">${esc(focus.type)} · “${esc(focus.span)}” → <b>${esc(focus.correction)}</b></span>
-          ${rest > 0 ? `<span class="ghost">+${rest} noted quietly — they'll come back when you're ready</span>` : ""}</div>`;
-      }
-      if (showFix && j.recast) extra += `<div class="fix"><span class="lab">recast</span>${esc(j.recast)}</div>`;
-      if (showFix && j.native && j.native !== j.recast) extra += `<div class="fix"><span class="lab">native</span>${esc(j.native)}</div>`;
-      const uw = (j.pr_meta || {}).unclear_words;
-      if (showCorr && uw && uw.length) extra += `<div class="unclear">came out fuzzy (ASR proxy): ${esc(uw.join(", "))}</div>`;
-      if (j.parrot) extra += `<div class="ghost" style="margin-top:4px">echoing me? nice try — say it in your own sentence for credit 😉</div>`;
-      if (j.fl_meta && j.fl_meta.wps != null) extra += paceGauge(j.fl_meta.wps);
-      youBub.insertAdjacentHTML("beforeend", extra);
-      kaiBub.innerHTML = `<div class="who">kai${scene ? " · in character" : ""}</div>${esc(j.reply)}` +
-        (j.degraded ? `<div class="badge">judge offline — conversation continues</div>` : "");
-      scorePanel(j.scores, grace);
-      renderScenePanel(j.scene);
-      lastFocusPattern = j.focus_pattern || "";
-      $("lvl").textContent = j.level; $("xptotal").textContent = j.xp;
-      if (j.lv) $("lvxp").textContent = "Lv " + j.lv.lv + " · " + j.xp + "/" + j.lv.next_at;
-      $("ptt").disabled = false;
-      $("hint").textContent = "speaking…";
-      break; }
-    case "tts": {
-      const isFix = j.kind === "fix";
-      const target = isFix ? youBub : kaiBub;
-      if (!target) break;
-      const a = document.createElement("audio"); a.controls = true; a.src = j.audio;
-      target.appendChild(a);
-      target.insertAdjacentHTML("beforeend",
-        `<div class="badge">${isFix ? (j.own_voice ? "☝ your voice, fluent · " : "☝ Kai's voice — your twin is offline · ") : ""}${j.engine}</div>`);
-      // 流利版一到 → 打磨面板开 (核心循环: 反复模仿这条参考直到满意)
-      enqueueAudio(a, isFix ? () => openPolish(j.ref_text, j.ref_words, j.audio) : null);
-      if (isFix) fixMeta = true;
-      break; }
+    case "target":
+      studio.target = j.target;
+      renderTargetCard(j.target, j.errors, j.note, j.changed);
+      if (j.degraded) $("clonetoast").innerHTML = '<div class="ghost">coach offline — practicing your sentence as-is</div>';
+      break;
+    case "clone":
+      $("clonetoast").innerHTML = `<div class="clonetoast">🎙 ${j.status === "created"
+        ? "voice clone created from this very sentence — it improves as you practice"
+        : "your twin just got better — clone rebuilt from your recent takes"}</div>`;
+      refreshState();
+      break;
+    case "ref":
+      renderRef(j);
+      break;
     case "error":
-      if (!j.recoverable){
-        youBub.remove();
-        if (kaiBub && kaiBub.querySelector(".dots")) kaiBub.remove();   // 别留永久转圈的气泡
-        $("hint").textContent = j.error || "error — try again";
-        $("ptt").disabled = false;
-      } else {
-        (kaiBub || youBub).insertAdjacentHTML("beforeend", `<div class="badge">audio unavailable · ${j.at}</div>`);
-      }
+      if (!j.recoverable){ resetStudio(); $("hint").textContent = j.error || "try again"; }
+      else { const m = $("ref-media"); if (m) m.innerHTML = `<div class="ghost">reference audio unavailable (${esc(j.at)}) — read the target aloud anyway</div>`; }
       break;
     case "done":
-      if (!polish) $("hint").textContent = "hold — speak English — release";
+      refreshState();
       break;
-  }};
+  }});
+  busy = false;
 }
 
-/* ================= PTT ================= */
+async function sendAttempt(blob){
+  busy = true;
+  $("hint").textContent = "comparing your take against the fluent you…";
+  const fd = new FormData();
+  fd.append("file", blob, "att.webm");
+  fd.append("ref_text", studio.target || "");
+  fd.append("ref_words", JSON.stringify(studio.ref_words || []));
+  fd.append("pattern", studio.pattern || "");
+  fd.append("attempt", String(studio.attempts.length + 1));
+  const r = await fetch("/api/polish/attempt", {method: "POST", body: fd});
+  const j = await r.json();
+  busy = false;
+  if (!r.ok){ $("hint").textContent = j.error || "couldn't hear that — one more?"; return; }
+  j._blob = blob;
+  studio.attempts.push(j);
+  renderTakes();
+  $("hint").textContent = j.passed ? "🔥 again for rhythm — or 🆕 for a new sentence"
+                                   : "some words missing — ▶ listen once more, then go again";
+}
+
+/* ============ PTT + 实时波形 ============ */
 let mr = null, chunks = [], ac = null, meterRAF = null;
 async function startRec(){
-  if (!sessionOn || (mr && mr.state === "recording")) return;
-  stopAllAudio();                                    // barge-in
-  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  if (busy || (mr && mr.state === "recording")) return;
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: true}); }
+  catch { $("hint").textContent = "microphone blocked — allow mic access"; return; }
   chunks = [];
   mr = new MediaRecorder(stream);
   mr.ondataavailable = e => chunks.push(e.data);
-  // mic level ring + 实时滚动波形 (录音时的"它在听我"反馈)
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
     const an = ac.createAnalyser(); an.fftSize = 512;
     ac.createMediaStreamSource(stream).connect(an);
     const buf = new Uint8Array(an.fftSize);
     const cv = $("wavec"), ctx2 = cv.getContext("2d");
-    cv.classList.add("on");
-    ctx2.clearRect(0, 0, cv.width, cv.height);
-    const col = polish ? "rgba(25,158,112,.9)" : "rgba(57,135,229,.9)";
+    cv.classList.add("on"); ctx2.clearRect(0, 0, cv.width, cv.height);
+    const imit = !!(studio && studio.target);
+    const col = imit ? "rgba(25,158,112,.9)" : "rgba(57,135,229,.9)";
     let x = 0;
     const loop = () => {
       an.getByteTimeDomainData(buf);
       let s = 0; for (let i = 0; i < buf.length; i++){ const v = (buf[i] - 128) / 128; s += v * v; }
       const rms = Math.sqrt(s / buf.length);
-      $("ptt").style.boxShadow = `0 0 ${12 + rms * 220}px rgba(${polish ? "25,158,112" : "208,59,59"},.45)`;
-      // 滚动波形: 每帧画一根 RMS 竖线, 到头回卷
+      $("ptt").style.boxShadow = `0 0 ${12 + rms * 220}px rgba(${imit ? "25,158,112" : "208,59,59"},.45)`;
       const h = Math.max(2, rms * cv.height * 2.6);
       ctx2.fillStyle = col;
       ctx2.fillRect(x, (cv.height - h) / 2, 2, h);
       x = (x + 2) % cv.width;
-      ctx2.clearRect(x, 0, 14, cv.height);        // 抹掉游标前方一段
+      ctx2.clearRect(x, 0, 14, cv.height);
       meterRAF = requestAnimationFrame(loop);
     };
     loop();
@@ -965,30 +413,38 @@ async function startRec(){
     $("ptt").classList.remove("rec");
     const blob = new Blob(chunks, {type: mr.mimeType});
     if (blob.size < 2000){ $("hint").textContent = "too short — hold while you speak"; return; }
-    if (polish){ postAttempt(blob); return; }
-    $("hint").textContent = "transcribing…";
-    $("ptt").disabled = true;
-    const youBub = bubble(`<div class="who">you</div><span class="dots"></span>`, "you");
-    const fd = new FormData(); fd.append("file", blob, "turn.webm");
-    await streamTurn("/api/turn", fd, handleStages(youBub));
+    if (studio && studio.target) sendAttempt(blob);
+    else sendSay(blob);
   };
   mr.start();
   $("ptt").classList.add("rec");
-  $("hint").textContent = polish ? "recording your take… release when done" : "I'm listening — take your time.";
+  $("hint").textContent = "listening… release when done";
 }
 function stopRec(){ if (mr && mr.state === "recording") mr.stop(); }
 $("ptt").addEventListener("pointerdown", e => { e.preventDefault(); startRec(); });
 $("ptt").addEventListener("pointerup", stopRec);
 $("ptt").addEventListener("pointerleave", stopRec);
 window.addEventListener("keydown", e => {
-  if (e.code === "Space" && !e.repeat && sessionOn && !e.target.matches("input,textarea")){ e.preventDefault(); startRec(); }
+  if (e.code === "Space" && !e.repeat && !e.target.matches("input,textarea")){ e.preventDefault(); startRec(); }
 });
 window.addEventListener("keyup", e => {
-  if (e.code === "Space" && sessionOn && !e.target.matches("input,textarea")){ e.preventDefault(); stopRec(); }
+  if (e.code === "Space" && !e.target.matches("input,textarea")){ e.preventDefault(); stopRec(); }
 });
 
-/* boot */
-refreshState().then(() => { boot(); pickMode("free"); });
+/* ============ 状态栏 ============ */
+async function refreshState(){
+  try {
+    const s = await (await fetch("/api/state")).json();
+    $("rightbar").textContent = `🔥 ${s.profile.streak}d · ${s.profile.xp} xp · ${s.level}`;
+    $("stats").innerHTML = `Lv <b>${s.lv.lv}</b> · <b>${s.cards_total}</b> mistake cards live`;
+    const badges = [["clone", s.eleven_cloned], ["elevenlabs", s.eleven_key],
+                    ["coach · " + s.judge + (s.judge === "cli" ? " · opus" : ""), s.judge !== "cli"]];
+    if (s.mock) badges.push(["MOCK", "warn"]);
+    $("svc").innerHTML = badges.map(([n, v]) =>
+      `<span class="${v === true ? "on" : ""}">${n}</span>`).join("");
+  } catch {}
+}
+refreshState();
 </script>
 </body>
 </html>

@@ -94,6 +94,11 @@ def profile_redirect():
     return RedirectResponse("/progress")
 
 
+@app.get("/talk")
+def talk_page():
+    return _page("talk.html")
+
+
 @app.get("/demo")
 def demo_page():
     return _page("demo.html")
@@ -544,6 +549,74 @@ async def turn(file: UploadFile = File(...)):
                     yield ev("error", at=f"tts-{kind}", error=str(e)[:150], recoverable=True)
         except Exception:
             yield ev("error", at="tts", error="tts timed out", recoverable=True)
+        yield ev("done", ms=int((time.time() - t0) * 1000))
+
+    return StreamingResponse(gen(), media_type="application/x-ndjson")
+
+
+# ============================================================ 练习室 (无 Kai 无对话): 说→纠→克隆参考
+@app.post("/api/practice/say")
+async def practice_say(file: UploadFile = File(...)):
+    """纯打磨流: STT → 精简纠正(无对话) → 克隆声参考(带词级时间轴)。NDJSON 流式。"""
+    body = await file.read()
+    ts = int(time.time() * 10) % 10_000_000
+
+    def gen():
+        t0 = time.time()
+
+        def ev(stage, **kw):
+            kw.update(stage=stage, t=int((time.time() - t0) * 1000))
+            return json.dumps(kw, ensure_ascii=False) + "\n"
+
+        yield ev("received")
+        try:
+            wav = _to_wav(body, f"say_{ts}")
+            stt = stt_mod.transcribe(str(wav))
+        except Exception as e:
+            yield ev("error", at="stt", error=f"audio failed: {e}", recoverable=False)
+            return
+        heard = (stt.get("text") or "").strip()
+        if not heard:
+            yield ev("error", at="stt", error="no speech detected — hold while you speak", recoverable=False)
+            return
+        fl, fl_meta = scoring.fluency_score(stt, heard)
+        pr, pr_meta = scoring.pron_score(stt, heard)
+        yield ev("stt", heard=heard, stt_engine=stt.get("engine", ""),
+                 words=stt.get("words", []), audio=f"/audio/say_{ts}.wav",
+                 fl=fl, fl_meta=fl_meta, pr=pr, pr_meta=pr_meta)
+
+        corr, degraded = brain.practice_correct(
+            heard, level=memory.level_of(store.profile["skills"]),
+            native_lang=store.profile.get("native_lang", ""))
+        target = (corr.get("target") or heard).strip()
+        errors = (corr.get("errors") or [])[:3]
+        if not degraded:
+            for err in errors:
+                store.record_error(err, heard, context={"mode": "practice"})
+            store.update_cx(int(corr.get("complexity", 1)))
+            store.add_xp(2 + len(errors))
+            store.save()
+        yield ev("target", target=target, errors=errors, note=corr.get("note", ""),
+                 changed=target.lower() != heard.lower(), degraded=degraded)
+
+        fix_voice = store.profile.get("fix_voice", "user")
+        # 零 warm-up: 这句话本身直接喂克隆 (无克隆→立即建; 有→攒池进化)
+        clone_status = tts.ensure_clone_from(str(wav))
+        if clone_status:
+            yield ev("clone", status=clone_status)
+        try:
+            engine, ref_words = tts.say_with_timing(target, fix_voice, AUDIO / f"ref_{ts}")
+            url = f"/audio/{tts.audio_path(AUDIO / f'ref_{ts}').name}"
+            (BASE / "data" / "demo_latest.json").write_text(json.dumps({
+                "heard": heard, "fix_text": target,
+                "orig_audio": f"/audio/say_{ts}.wav", "fix_audio": url,
+                "own_voice": fix_voice == "user", "engine": engine,
+                "words": stt.get("words", []), "ts": int(time.time())}, ensure_ascii=False))
+            yield ev("ref", audio=url, words=ref_words, engine=engine,
+                     own_voice=fix_voice == "user",
+                     pattern=(errors[0].get("pattern") if errors else ""))
+        except Exception as e:
+            yield ev("error", at="tts-ref", error=str(e)[:150], recoverable=True)
         yield ev("done", ms=int((time.time() - t0) * 1000))
 
     return StreamingResponse(gen(), media_type="application/x-ndjson")

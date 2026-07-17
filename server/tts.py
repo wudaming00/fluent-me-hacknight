@@ -88,6 +88,63 @@ def _say_local(text: str, voice: str, out: Path):
                     "-o", str(out)], check=True, timeout=300)
 
 
+POOL = DATA / "voice" / "pool"
+POOL.mkdir(parents=True, exist_ok=True)
+REBUILD_AT = (3, 6, 10)     # 样本池到这些数量时重建克隆 — 越练越像你
+
+
+def ensure_clone_from(wav_path: str, min_dur: float = 1.5) -> str | None:
+    """零 warm-up 克隆: 练习语音直接入样本池。无克隆 → 立即用它建;
+    有克隆 → 攒到 REBUILD_AT 档位就重建 (删旧建新, 换 voice_id)。
+    返回 "created" | "improved" | None。失败静默 (克隆是增强, 不能挡练习)。"""
+    key = _eleven_key()
+    if not key or os.environ.get("FLUENTME_MOCK"):
+        return None
+    try:
+        import shutil
+        import wave as wavmod
+        with wavmod.open(wav_path, "rb") as w:
+            dur = w.getnframes() / w.getframerate()
+        if dur < min_dur:
+            return None
+        n = len(list(POOL.glob("*.wav")))
+        shutil.copy(wav_path, POOL / f"s{int(os.path.getmtime(wav_path) * 10) % 10**9}_{n}.wav")
+        if not USER_REF.exists():
+            shutil.copy(wav_path, USER_REF)          # 本地 Higgs 兜底也有样本
+        voices = _eleven_voices()
+        have = bool(voices.get("user"))
+        n += 1
+        if have and n not in REBUILD_AT:
+            return None
+        samples = sorted(POOL.glob("*.wav"), key=lambda p: p.stat().st_mtime)[-10:]
+        if have:                                      # 重建: 删旧 (slot 有限)
+            try:
+                req = urllib.request.Request(
+                    f"https://api.elevenlabs.io/v1/voices/{voices['user']}",
+                    method="DELETE", headers={"xi-api-key": key})
+                urllib.request.urlopen(req, timeout=15).read()
+            except Exception:
+                pass
+        boundary = __import__("uuid").uuid4().hex
+        body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\nfluent-me-user\r\n").encode()
+        for p in samples:
+            body += (f"--{boundary}\r\nContent-Disposition: form-data; name=\"files\"; filename=\"{p.name}\"\r\n"
+                     f"Content-Type: audio/wav\r\n\r\n").encode() + p.read_bytes() + b"\r\n"
+        body += f"--{boundary}--\r\n".encode()
+        req = urllib.request.Request("https://api.elevenlabs.io/v1/voices/add", data=body, method="POST",
+                                     headers={"xi-api-key": key,
+                                              "Content-Type": f"multipart/form-data; boundary={boundary}"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            vid = json.loads(r.read()).get("voice_id", "")
+        if vid:
+            voices["user"] = vid
+            (DATA / "eleven_voices.json").write_text(json.dumps(voices))
+            return "improved" if have else "created"
+    except Exception:
+        pass
+    return None
+
+
 def _say_mock(out: Path):
     """无任何 TTS 可用时的开发桩: 0.5s 提示音, UI 音频链路照常可测。"""
     import math

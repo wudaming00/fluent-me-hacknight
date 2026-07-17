@@ -262,6 +262,26 @@ Return ONLY JSON:
     return _claude_json(prompt)
 
 
+def practice_correct(heard: str, level: str = "B1", native_lang: str = "") -> tuple[dict, bool]:
+    """练习室专用: 只纠正不对话 — 输出短, 比完整判卷快约一半。(target, errors, note)"""
+    prior = L1_PRIORS.get(native_lang, "")
+    prompt = f"""You are a precise English pronunciation & phrasing coach. Learner level ≈ {level}. {prior}
+They said (ASR transcript, ignore obvious ASR noise): "{heard}"
+
+Return ONLY JSON:
+{{"target": "<natural minimal-edit version to practice aloud — same meaning; if already natural, return their sentence verbatim>",
+"errors": [max 3, {{"span": "<their words>", "type": "tense|article|preposition|word-choice|plural|word-order|collocation|habit|other",
+"severity": "minor|major|blocking", "correction": "<fixed>", "explanation": "<≤8 words>",
+"pattern": "<kebab-key like tense-past-simple / habit-very-like>", "pattern_label": "<short label>"}}],
+"note": "<one coaching tip ≤12 words, about delivery or the main fix>", "complexity": 1-5}}"""
+    txt = ""
+    try:
+        txt = _raw_text(prompt, judge_timeout(20))
+        return json.loads(txt[txt.find("{"):txt.rfind("}") + 1]), False
+    except Exception:
+        return {"target": heard, "errors": [], "note": "", "complexity": 1}, True
+
+
 def mock_verdict(rows: str, kind: str) -> dict:
     """面试/演讲收尾裁决 (1 call)。kind ∈ interview|presentation。"""
     what = ("mock interview" if kind == "interview" else "presentation rehearsal")
@@ -325,6 +345,12 @@ def _mock_json(prompt: str) -> dict:
                 "topics": ["hackathon"], "facts": [{"text": "is building a hackathon project", "kind": "project"}],
                 "best_moment": "I went there yesterday with my friend.",
                 "sendoff": "That hackathon story was your best English tonight — come back and tell me how the demo went."}
+    if '"target"' in prompt and "coach" in prompt.lower():
+        return {"target": "I went to the office yesterday and met my manager.",
+                "errors": [{"span": "I go to the office yesterday", "type": "tense", "severity": "major",
+                            "correction": "I went to the office yesterday", "explanation": "past needs went",
+                            "pattern": "tense-past-simple", "pattern_label": "past simple tense"}],
+                "note": "Slow the middle — land 'went' cleanly.", "complexity": 3}
     if '"scores"' in prompt:
         out = {"reply": "Nice! What did you two end up doing there?",
                "scores": {"grammar": 78, "vocab": 72}, "complexity": 3,

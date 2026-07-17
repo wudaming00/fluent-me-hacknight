@@ -308,12 +308,19 @@ function paceGauge(wps){
     <span class="val">${wps.toFixed(1)} w/s · ${label}</span></div>`;
 }
 
-/* ============ 播放 ============ */
+/* ============ 播放: 全局单播放器 — 新声必停旧声, 永不重叠 ============ */
+let currentAudio = null;
+function stopAudio(){
+  if (currentAudio){ currentAudio.pause(); currentAudio = null; }
+}
 function playSrc(src, rate){
+  stopAudio();
   const a = new Audio(src instanceof Blob ? URL.createObjectURL(src) : src);
   a.playbackRate = rate || 1;
   try { a.preservesPitch = true; } catch {}
-  a.play().catch(() => {});
+  a.onended = a.onerror = () => { if (currentAudio === a) currentAudio = null; };
+  currentAudio = a;
+  a.play().catch(() => { if (currentAudio === a) currentAudio = null; });
 }
 function dimClass(v){ return v == null ? "" : v >= 80 ? "g" : v >= 50 ? "y" : "r"; }
 
@@ -511,6 +518,7 @@ async function sendAttempt(blob){
 let mr = null, chunks = [], ac = null, meterRAF = null;
 async function startRec(){
   if (busy || (mr && mr.state === "recording")) return;
+  stopAudio();                       // barge-in: 你一开口, 其他声音全停
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({audio: true}); }
   catch { $("hint").textContent = "microphone blocked — allow mic access"; return; }
